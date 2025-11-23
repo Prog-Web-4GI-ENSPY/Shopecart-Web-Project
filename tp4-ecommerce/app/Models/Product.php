@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * @OA\Schema(
@@ -52,6 +53,14 @@ class Product extends Model
         'published_at' => 'datetime',
         'gallery' => 'array',
     ];
+
+
+    
+
+
+
+    
+
 
     // Relation avec Category
     public function category(): BelongsTo

@@ -39,11 +39,30 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $orders = Order::where('user_id', auth()->id())
+        try{
+            $orders = Order::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        if ($orders ->isEmpty()){
+
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'commande non trouvee',
+                'code' => 404
+            ],404);
+        }
         return new OrderCollection($orders);
+
+        }
+        catch (\Exception $e){
+
+            return response()->json(['status' => 'error', 'message' => 'Erreur serveur', 'code' => 500], 500);
+
+        }
+
+       
     }
 
     /**
@@ -55,9 +74,8 @@ class OrderController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"customer_first_name", "customer_last_name", "customer_email", "customer_phone", "shipping_address", "shipping_city", "shipping_zipcode", "shipping_country", "payment_method"},
-     *             @OA\Property(property="customer_first_name", type="string", example="John"),
-     *             @OA\Property(property="customer_last_name", type="string", example="Doe"),
+     *             required={"customer_name", "customer_email", "customer_phone", "shipping_address", "shipping_city", "shipping_zipcode", "shipping_country", "payment_method"},
+     *             @OA\Property(property="customer_name", type="string", example="John"),
      *             @OA\Property(property="customer_email", type="string", format="email", example="john@example.com"),
      *             @OA\Property(property="customer_phone", type="string", example="+1234567890"),
      *             @OA\Property(property="shipping_address", type="string", example="123 Main St"),
@@ -90,15 +108,14 @@ class OrderController extends Controller
     {
         $cart = $this->getCurrentCart($request);
 
-        if ($cart->items_count === 0) {
+        if (!$cart || $cart->items_count === 0) {
             return response()->json([
                 'message' => 'Your cart is empty'
             ], 422);
         }
 
         $validated = $request->validate([
-            'customer_first_name' => 'required|string|max:255',
-            'customer_last_name' => 'required|string|max:255',
+            'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email',
             'customer_phone' => 'required|string|max:20',
             'shipping_address' => 'required|string',
@@ -133,8 +150,7 @@ class OrderController extends Controller
                 'total' => $cart->total,
                 'user_id' => auth()->id(),
                 'customer_email' => $validated['customer_email'],
-                'customer_first_name' => $validated['customer_first_name'],
-                'customer_last_name' => $validated['customer_last_name'],
+                'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
                 'shipping_address' => $validated['shipping_address'],
                 'shipping_city' => $validated['shipping_city'],
