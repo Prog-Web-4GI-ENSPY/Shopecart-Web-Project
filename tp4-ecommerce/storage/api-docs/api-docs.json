@@ -816,8 +816,7 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "customer_first_name",
-                                    "customer_last_name",
+                                    "customer_name",
                                     "customer_email",
                                     "customer_phone",
                                     "shipping_address",
@@ -827,13 +826,9 @@
                                     "payment_method"
                                 ],
                                 "properties": {
-                                    "customer_first_name": {
+                                    "customer_name": {
                                         "type": "string",
                                         "example": "John"
-                                    },
-                                    "customer_last_name": {
-                                        "type": "string",
-                                        "example": "Doe"
                                     },
                                     "customer_email": {
                                         "type": "string",

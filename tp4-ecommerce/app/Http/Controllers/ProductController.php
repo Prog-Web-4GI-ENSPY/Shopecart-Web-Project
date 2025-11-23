@@ -9,6 +9,7 @@ use App\Http\Resources\ProductResource;
 use App\Http\Resources\ProductCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * @OA\Tag(
@@ -88,6 +89,22 @@ use Illuminate\Support\Facades\Storage;
  */
 class ProductController extends Controller
 {
+
+    function generateUniqueSlug($name)
+    {
+
+        $slug = Str::slug($name);
+        $originalSlug = $slug;
+        $count = 1;
+
+        // boucle tant que le slug existe deja dans la table products
+        while (Product::where('slug', $slug)->exists()){
+
+            $slug = $originalSlug .'-'.$count;
+            $count++;
+        }
+        return $slug;
+    }
     // ... Les méthodes index(), show(), featured() restent publiques
 
     /**
@@ -147,14 +164,13 @@ class ProductController extends Controller
             'is_featured' => 'boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-        $slug = \Illuminate\Support\Str::slug($validated['name']);
 
         // Les vendeurs ne peuvent créer que des produits visibles par défaut
         if ($user->isVendor()) {
             $validated['is_visible'] = true;
 
         }
-        $validated['slug'] = $slug;
+        $validated['slug'] = $this->generateUniqueSlug($validated['name']);
         $product = Product::create($validated);
 
         return response()->json([
