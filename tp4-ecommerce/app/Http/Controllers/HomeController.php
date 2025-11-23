@@ -2,64 +2,66 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrderItem;
+use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
+
 
 class HomeController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Afficher la page d'accueil
      */
     public function index()
     {
-        //
+        $featuredProducts = Product::with('category')
+            ->where('is_visible', true)
+            ->where('is_featured', true)
+            ->where('stock', '>', 0)
+            ->orderBy('created_at', 'desc')
+            ->take(8)
+            ->get();
+
+        $categories = Category::where('is_visible', true)
+            ->orderBy('position')
+            ->take(6)
+            ->get();
+
+        return view('pages.home', compact('featuredProducts', 'categories'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Afficher la page À propos
      */
-    public function create()
+    public function about()
     {
-        //
+        return view('pages.about');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Afficher la page Contact
      */
-    public function store(Request $request)
+    public function contact()
     {
-        //
+        return view('pages.contact');
     }
 
     /**
-     * Display the specified resource.
+     * Traiter le formulaire de contact
      */
-    public function show(OrderItem $orderItem)
+    public function contactSubmit(Request $request)
     {
-        //
-    }
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|min:10',
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(OrderItem $orderItem)
-    {
-        //
-    }
+        // Ici vous pouvez envoyer un email ou sauvegarder en base
+        // Pour l'instant, on retourne juste un message de succès
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, OrderItem $orderItem)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(OrderItem $orderItem)
-    {
-        //
+        return redirect()->route('contact')
+            ->with('success', 'Votre message a été envoyé avec succès! Nous vous répondrons bientôt.');
     }
 }
