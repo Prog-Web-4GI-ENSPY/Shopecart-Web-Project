@@ -511,7 +511,7 @@
             <p class="section-subtitle">Sélection basée sur vos préférences</p>
             <div class="products-grid" id="products-for-you-grid">
             
-                <a href="product_casqueDetail.html?id=1" class="product-card" data-id="1" data-brand="sennheiser" data-price-raw="150000" data-rating-raw="4.4">
+                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card" data-id="1" data-brand="sennheiser" data-price-raw="150000" data-rating-raw="4.4">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -529,7 +529,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=2" class="product-card" data-id="2" data-brand="beats by dre" data-price-raw="220000" data-rating-raw="4.5">
+                <a href="{{ route('casque_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="beats by dre" data-price-raw="220000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C6.jpeg" alt="Studio 3 Wireless" class="product-image">
                         <div class="product-tag tag-promo">-25%</div>
@@ -547,7 +547,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=3" class="product-card" data-id="3" data-brand="bose" data-price-raw="299000" data-rating-raw="4.8">
+                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card" data-id="3" data-brand="bose" data-price-raw="299000" data-rating-raw="4.8">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C" alt="QuietComfort 45" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -565,7 +565,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=4" class="product-card" data-id="4" data-brand="sony" data-price-raw="349000" data-rating-raw="4.9">
+                <a href="{{ route('casque_details', ['id' => 4]) }}" class="product-card" data-id="4" data-brand="sony" data-price-raw="349000" data-rating-raw="4.9">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -583,7 +583,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=5" class="product-card" data-id="5" data-brand="jbl" data-price-raw="129000" data-rating-raw="4.2">
+                <a href="{{ route('casque_details', ['id' => 5]) }}" class="product-card" data-id="5" data-brand="jbl" data-price-raw="129000" data-rating-raw="4.2">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C13.jpeg" alt="Live 660NC" class="product-image">
                         
@@ -601,7 +601,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=6" class="product-card" data-id="6" data-brand="marshall" data-price-raw="179000" data-rating-raw="4.6">
+                <a href="{{ route('casque_details', ['id' => 6]) }}" class="product-card" data-id="6" data-brand="marshall" data-price-raw="179000" data-rating-raw="4.6">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M4.jpeg" alt="Major IV Bluetooth" class="product-image">
                         
@@ -619,7 +619,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=7" class="product-card" data-id="7" data-brand="anker" data-price-raw="89000" data-rating-raw="4.3">
+                <a href="{{ route('casque_details', ['id' => 7]) }}" class="product-card" data-id="7" data-brand="anker" data-price-raw="89000" data-rating-raw="4.3">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C7.jpeg" alt="Soundcore Life Q35" class="product-image">
                         <div class="product-tag tag-promo">-15%</div>
@@ -637,7 +637,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=8" class="product-card" data-id="8" data-brand="skullcandy" data-price-raw="159000" data-rating-raw="4.0">
+                <a href="{{ route('casque_details', ['id' => 8]) }}" class="product-card" data-id="8" data-brand="skullcandy" data-price-raw="159000" data-rating-raw="4.0">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C5.jpeg" alt="Crusher Evo" class="product-image">
                         
@@ -655,7 +655,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=9" class="product-card" data-id="9" data-brand="jabra" data-price-raw="249000" data-rating-raw="4.7">
+                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card" data-id="9" data-brand="jabra" data-price-raw="249000" data-rating-raw="4.7">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
                         
@@ -673,7 +673,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=1" class="product-card" data-id="1" data-brand="sennheiser" data-price-raw="150000" data-rating-raw="4.4">
+                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card" data-id="1" data-brand="sennheiser" data-price-raw="150000" data-rating-raw="4.4">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -691,7 +691,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=2" class="product-card" data-id="2" data-brand="beats by dre" data-price-raw="220000" data-rating-raw="4.5">
+                <a href="{{ route('casque_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="beats by dre" data-price-raw="220000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C6.jpeg" alt="Studio 3 Wireless" class="product-image">
                         <div class="product-tag tag-promo">-25%</div>
@@ -709,7 +709,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=3" class="product-card" data-id="3" data-brand="bose" data-price-raw="299000" data-rating-raw="4.8">
+                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card" data-id="3" data-brand="bose" data-price-raw="299000" data-rating-raw="4.8">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C" alt="QuietComfort 45" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -727,7 +727,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=4" class="product-card" data-id="4" data-brand="sony" data-price-raw="349000" data-rating-raw="4.9">
+                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card" data-id="4" data-brand="sony" data-price-raw="349000" data-rating-raw="4.9">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -745,7 +745,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=5" class="product-card" data-id="5" data-brand="jbl" data-price-raw="129000" data-rating-raw="4.2">
+                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card" data-id="5" data-brand="jbl" data-price-raw="129000" data-rating-raw="4.2">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C13.jpeg" alt="Live 660NC" class="product-image">
                         
@@ -763,7 +763,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=6" class="product-card" data-id="6" data-brand="marshall" data-price-raw="179000" data-rating-raw="4.6">
+                <a href="{{ route('casque_details', ['id' => 6]) }}" class="product-card" data-id="6" data-brand="marshall" data-price-raw="179000" data-rating-raw="4.6">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M4.jpeg" alt="Major IV Bluetooth" class="product-image">
                         
@@ -781,7 +781,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=7" class="product-card" data-id="7" data-brand="anker" data-price-raw="89000" data-rating-raw="4.3">
+                <a href="{{ route('casque_details', ['id' => 7]) }}" class="product-card" data-id="7" data-brand="anker" data-price-raw="89000" data-rating-raw="4.3">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C7.jpeg" alt="Soundcore Life Q35" class="product-image">
                         <div class="product-tag tag-promo">-15%</div>
@@ -799,7 +799,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=8" class="product-card" data-id="8" data-brand="skullcandy" data-price-raw="159000" data-rating-raw="4.0">
+                <a href="{{ route('casque_details', ['id' => 8]) }}" class="product-card" data-id="8" data-brand="skullcandy" data-price-raw="159000" data-rating-raw="4.0">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C5.jpeg" alt="Crusher Evo" class="product-image">
                         
@@ -817,7 +817,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=9" class="product-card" data-id="9" data-brand="jabra" data-price-raw="249000" data-rating-raw="4.7">
+                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card" data-id="9" data-brand="jabra" data-price-raw="249000" data-rating-raw="4.7">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
                         
@@ -835,7 +835,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=1" class="product-card" data-id="1" data-brand="sennheiser" data-price-raw="150000" data-rating-raw="4.4">
+                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card" data-id="1" data-brand="sennheiser" data-price-raw="150000" data-rating-raw="4.4">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -853,7 +853,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=2" class="product-card" data-id="2" data-brand="beats by dre" data-price-raw="220000" data-rating-raw="4.5">
+                <a href="{{ route('casque_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="beats by dre" data-price-raw="220000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C6.jpeg" alt="Studio 3 Wireless" class="product-image">
                         <div class="product-tag tag-promo">-25%</div>
@@ -871,7 +871,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=3" class="product-card" data-id="3" data-brand="bose" data-price-raw="299000" data-rating-raw="4.8">
+                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card" data-id="3" data-brand="bose" data-price-raw="299000" data-rating-raw="4.8">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C" alt="QuietComfort 45" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -889,7 +889,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=4" class="product-card" data-id="4" data-brand="sony" data-price-raw="349000" data-rating-raw="4.9">
+                <a href="{{ route('casque_details', ['id' => 4]) }}" class="product-card" data-id="4" data-brand="sony" data-price-raw="349000" data-rating-raw="4.9">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -907,7 +907,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=5" class="product-card" data-id="5" data-brand="jbl" data-price-raw="129000" data-rating-raw="4.2">
+                <a href="{{ route('casque_details', ['id' => 5]) }}" class="product-card" data-id="5" data-brand="jbl" data-price-raw="129000" data-rating-raw="4.2">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C13.jpeg" alt="Live 660NC" class="product-image">
                         
@@ -925,7 +925,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=6" class="product-card" data-id="6" data-brand="marshall" data-price-raw="179000" data-rating-raw="4.6">
+                <a href="{{ route('casque_details', ['id' => 6]) }}" class="product-card" data-id="6" data-brand="marshall" data-price-raw="179000" data-rating-raw="4.6">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M4.jpeg" alt="Major IV Bluetooth" class="product-image">
                         
@@ -943,7 +943,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=7" class="product-card" data-id="7" data-brand="anker" data-price-raw="89000" data-rating-raw="4.3">
+                <a href="{{ route('casque_details', ['id' => 7]) }}" class="product-card" data-id="7" data-brand="anker" data-price-raw="89000" data-rating-raw="4.3">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C7.jpeg" alt="Soundcore Life Q35" class="product-image">
                         <div class="product-tag tag-promo">-15%</div>
@@ -961,7 +961,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=8" class="product-card" data-id="8" data-brand="skullcandy" data-price-raw="159000" data-rating-raw="4.0">
+                <a href="{{ route('casque_details', ['id' => 8]) }}" class="product-card" data-id="8" data-brand="skullcandy" data-price-raw="159000" data-rating-raw="4.0">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C5.jpeg" alt="Crusher Evo" class="product-image">
                         
@@ -979,7 +979,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=9" class="product-card" data-id="9" data-brand="jabra" data-price-raw="249000" data-rating-raw="4.7">
+                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card" data-id="9" data-brand="jabra" data-price-raw="249000" data-rating-raw="4.7">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
                         
@@ -997,7 +997,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=10" class="product-card" data-id="10" data-brand="akg" data-price-raw="139000" data-rating-raw="4.8">
+                <a href="{{ route('casque_details', ['id' => 10]) }}" class="product-card" data-id="10" data-brand="akg" data-price-raw="139000" data-rating-raw="4.8">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C3.png" alt="K371 Studio" class="product-image">
                         
