@@ -90,11 +90,19 @@ class OrderController extends Controller
     {
         $cart = $this->getCurrentCart($request);
 
-        if ($cart->items_count === 0) {
-            return response()->json([
-                'message' => 'Your cart is empty'
-            ], 422);
-        }
+       if (!$cart) {
+    return response()->json([
+        'success' => false,
+        'message' => 'Votre panier est vide'
+    ], 400);
+}
+
+if ($cart->items_count === 0) {
+    return response()->json([
+        'success' => false,
+        'message' => 'Votre panier est vide'
+    ], 400);
+}
 
         $validated = $request->validate([
             'customer_first_name' => 'required|string|max:255',
