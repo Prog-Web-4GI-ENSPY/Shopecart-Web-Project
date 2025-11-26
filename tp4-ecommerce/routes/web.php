@@ -48,6 +48,7 @@ Route::view('/security','security')->name('security');
 Route::view('/conditions','conditions')->name('conditions');
 Route::view('/cookies','cookies')->name('cookies');
 Route::view('/panier','panier')->name('panier');
+Route::view('/orderDetails','orderDetails')->name('orderDetails');
 Route::view('/product_casqueDetail', 'pages.product_casqueDetail')->name('casque_details');
 Route::view('/product_manetteDetail', 'pages.product_manetteDetail')->name('manette_details');
 Route::view('/product_ordi-detail', 'pages.product_ordi-detail')->name('ordi_details');
