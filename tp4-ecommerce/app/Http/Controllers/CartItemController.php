@@ -41,7 +41,7 @@ class CartItemController extends Controller
 
  /**
  * @OA\Get(
- *     path="/api/cartItem/{cartItemId}",
+ *     path="/api/cartItems/{cartItemId}",
  *     summary="Get a single cart item by ID",
  *     tags={"CartItem"},
  *     @OA\Parameter(
@@ -77,7 +77,7 @@ class CartItemController extends Controller
 
     /**
  * @OA\Post(
- *     path="/api/cartItem",
+ *     path="/api/cartItems",
  *     summary="Add a new cart item",
  *     tags={"CartItem"},
  *     @OA\RequestBody(
@@ -131,7 +131,7 @@ class CartItemController extends Controller
 
    /**
  * @OA\Put(
- *     path="/api/cart-item/{cartItemId}",
+ *     path="/api/cartItems/{cartItemId}",
  *     summary="Update an existing cart item",
  *     tags={"CartItem"},
  *     @OA\Parameter(
@@ -199,7 +199,7 @@ class CartItemController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/cart-item/{cartItemId}",
+     *     path="/api/cartItems/{cartItemId}",
      *     summary="Delete a cart item",
      *     tags={"CartItem"},
      *     @OA\Parameter(
