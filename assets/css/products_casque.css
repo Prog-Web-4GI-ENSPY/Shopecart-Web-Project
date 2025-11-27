@@ -19,6 +19,7 @@ body {
     font-family: 'Arial', sans-serif;
     color: var(--color-text-dark);
     background-color: var(--color-background);
+    padding-top: 5rem;
 }
 
 .container {
@@ -31,7 +32,8 @@ body {
 .main-content-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+
+
 }
 
 /* ===================================

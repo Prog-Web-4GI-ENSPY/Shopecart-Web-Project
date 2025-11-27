@@ -96,6 +96,9 @@ document.addEventListener('DOMContentLoaded', function() {
     searchBar.classList.add('active');
     userActions.classList.add('active');
     hamburger.classList.add('active');
+    accountButton.classList.add('active');
+    loginButton.classList.add('active');
+
     document.body.style.overflow = 'hidden'; // Empêcher le scroll
   }
 
