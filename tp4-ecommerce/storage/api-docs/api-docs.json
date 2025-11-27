@@ -247,13 +247,12 @@
         "/cart": {
             "get": {
                 "tags": [
-                    "CartItem"
+                    "Cart"
                 ],
                 "summary": "Get user's cart",
                 "operationId": "86f867f72e674aacd82942dcf38ba77e",
                 "responses": {
                     "200": {
-                        "description": "List of cart items",
                         "description": "Successful operation",
                         "content": {
                             "application/json": {
@@ -279,7 +278,7 @@
         "/api/cart/add/{product}": {
             "post": {
                 "tags": [
-                    "CartItem"
+                    "Cart"
                 ],
                 "summary": "Add item to cart",
                 "operationId": "510618525eea2bfafef7e7c9f3223cc2",
@@ -361,16 +360,9 @@
                     "content": {
                         "application/json": {
                             "schema": {
-<<<<<<< HEAD
                                 "required": [
-                                    "quantity",
-                                    "cartId",
-                                    "productVariantId"
                                     "quantity"
                                 ],
-
-                                "required": [],
-
                                 "properties": {
                                     "quantity": {
                                         "type": "integer",
@@ -546,13 +538,13 @@
                 }
             }
         },
-        "/api/cartItem/{cartItemId}": {
+        "/api/cartItems/{cartItemId}": {
             "get": {
                 "tags": [
                     "CartItem"
                 ],
                 "summary": "Get a single cart item by ID",
-                "operationId": "9a07881aaa06684db74cb3a4e8d923ec",
+                "operationId": "6656432577c7e26ffb9b88cf18ddcebc",
                 "parameters": [
                     {
                         "name": "cartItemId",
@@ -607,99 +599,13 @@
                         "description": "Cart item not found"
                     }
                 }
-            }
-        },
-        "/api/cartItem": {
-            "post": {
-                "tags": [
-                    "CartItem"
-                ],
-                "summary": "Add a new cart item",
-                "operationId": "2c559e984b1c3affc8ca86e782dbcd46",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "quantity",
-                                    "cartId",
-                                    "productVariantId"
-                                ],
-                                "properties": {
-                                    "quantity": {
-                                        "type": "integer",
-                                        "example": 2
-                                    },
-                                    "cartId": {
-                                        "type": "integer",
-                                        "example": 5
-                                    },
-                                    "productVariantId": {
-                                        "type": "integer",
-                                        "example": 10
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Cart item created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "cartId": {
-                                            "type": "integer",
-                                            "example": 5
-                                        },
-                                        "productVariantId": {
-                                            "type": "integer",
-                                            "example": 10
-                                        },
-                                        "quantity": {
-                                            "type": "integer",
-                                            "example": 2
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-11-13T12:00:00Z"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-11-13T12:05:00Z"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Product variant not found"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            }
-        },
-        "/api/cart-item/{cartItemId}": {
+            },
             "put": {
                 "tags": [
                     "CartItem"
                 ],
                 "summary": "Update an existing cart item",
-                "operationId": "9872194a3ff8cb859ac317c7f99e560c",
+                "operationId": "959220efcd68eb08d14cc121a69cddb1",
                 "parameters": [
                     {
                         "name": "cartItemId",
@@ -799,7 +705,7 @@
                     "CartItem"
                 ],
                 "summary": "Delete a cart item",
-                "operationId": "6159fa6c5467be9d6f07e8d940671c9c",
+                "operationId": "9282fe541984a1b64b350a44d643e678",
                 "parameters": [
                     {
                         "name": "cartItemId",
@@ -817,6 +723,90 @@
                     },
                     "404": {
                         "description": "Cart item not found"
+                    }
+                }
+            }
+        },
+        "/api/cartItems": {
+            "post": {
+                "tags": [
+                    "CartItem"
+                ],
+                "summary": "Add a new cart item",
+                "operationId": "dc9045ea47ded10c062f6c971ae2b4aa",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quantity",
+                                    "cartId",
+                                    "productVariantId"
+                                ],
+                                "properties": {
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "cartId": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "productVariantId": {
+                                        "type": "integer",
+                                        "example": 10
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cart item created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "cartId": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "productVariantId": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "quantity": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-11-13T12:00:00Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-11-13T12:05:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product variant not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 }
             }
@@ -958,7 +948,6 @@
             },
             "put": {
                 "tags": [
-                    "CartItem"
                     "Categories"
                 ],
                 "summary": "Update category",
@@ -974,123 +963,6 @@
                         }
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "List of cart items",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "cartId": {
-                                                "type": "integer",
-                                                "example": 5
-                                            },
-                                            "productVariantId": {
-                                                "type": "integer",
-                                                "example": 10
-                                            },
-                                            "quantity": {
-                                                "type": "integer",
-                                                "example": 2
-                                            },
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time"
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time"
-                                            }
-                                        },
-                                        "type": "object"
-                                    }
-
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Cart not found"
-                    }
-                }
-            }
-        },
-        "/api/cartItem/{cartItemId}": {
-            "get": {
-                "tags": [
-                    "CartItem"
-                ],
-                "summary": "Get a single cart item by ID",
-                "operationId": "9a07881aaa06684db74cb3a4e8d923ec",
-                "parameters": [
-                    {
-                        "name": "cartItemId",
-                        "in": "path",
-                        "description": "ID of the cart item",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Cart item retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "cartId": {
-                                            "type": "integer",
-                                            "example": 5
-                                        },
-                                        "productVariantId": {
-                                            "type": "integer",
-                                            "example": 10
-                                        },
-                                        "quantity": {
-                                            "type": "integer",
-                                            "example": 2
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-11-13T12:00:00Z"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-11-13T12:05:00Z"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Cart item not found"
-                    }
-                }
-            }
-        },
-        "/api/cartItem": {
-            "post": {
-                "tags": [
-                    "CartItem"
-                ],
-                "summary": "Add a new cart item",
-                "operationId": "2c559e984b1c3affc8ca86e782dbcd46",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1100,17 +972,6 @@
                                     "name"
                                 ],
                                 "properties": {
-                                    "quantity": {
-                                        "type": "integer",
-                                        "example": 3
-                                    },
-                                    "cartId": {
-                                        "type": "integer",
-                                        "example": 5
-                                    },
-                                    "productVariantId": {
-                                        "type": "integer",
-                                        "example": 10
                                     "name": {
                                         "type": "string",
                                         "example": "Electronics Updated"
@@ -1131,51 +992,6 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Cart item updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Cart item updated successfully"
-                                        },
-                                        "cartItem": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "cartId": {
-                                                    "type": "integer",
-                                                    "example": 5
-                                                },
-                                                "productVariantId": {
-                                                    "type": "integer",
-                                                    "example": 10
-                                                },
-                                                "quantity": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-11-13T12:00:00Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-11-13T12:05:00Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
                         "description": "Category updated successfully",
                         "content": {
                             "application/json": {
@@ -1404,7 +1220,7 @@
             },
             "post": {
                 "tags": [
-                    "Payments"
+                    "Orders"
                 ],
                 "summary": "Create a new order",
                 "operationId": "d690d6834318e9b064df441e854de8b9",
@@ -1559,6 +1375,135 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/payment/create-payment-intent/order/{orderId}": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Create a Stripe PaymentIntent and local payment record",
+                "operationId": "e90c50d0903f6a87baf44a1212373499",
+                "parameters": [
+                    {
+                        "name": "orderId",
+                        "in": "path",
+                        "description": "ID of the order linked to this payment",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount",
+                                    "paymentMethod"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": "number",
+                                        "example": 25.5
+                                    },
+                                    "paymentMethod": {
+                                        "type": "string",
+                                        "example": "card"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "PaymentIntent created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "clientSecret": {
+                                            "type": "string",
+                                            "example": "pi_12345_secret_abc"
+                                        },
+                                        "payment": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 10,
+                                                "amount": 25.5,
+                                                "paymentMethod": "card",
+                                                "transactionId": null,
+                                                "status": "PENDING"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/payment/registerPayment": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Register the transaction id of a payment",
+                "operationId": "14c010e1a7b269b2e9ba9601989560da",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "paymentId",
+                                    "transactionId"
+                                ],
+                                "properties": {
+                                    "paymentId": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "transactionId": {
+                                        "type": "string",
+                                        "example": "pi_3Xx123abc"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Payment completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Payment completed"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Payment does not exists"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/products": {
@@ -2956,6 +2901,10 @@
         {
             "name": "CartItem",
             "description": "CartItem"
+        },
+        {
+            "name": "Payments",
+            "description": "Payments"
         },
         {
             "name": "Products",
