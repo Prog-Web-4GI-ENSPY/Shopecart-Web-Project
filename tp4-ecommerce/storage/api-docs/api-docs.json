@@ -15,6 +15,316 @@
         }
     ],
     "paths": {
+        "/api/deliveries/pending": {
+            "get": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Get orders ready to be assigned to a delivery person",
+                "operationId": "94199be3212b130cf9cb314360583576",
+                "responses": {
+                    "200": {
+                        "description": "List of pending orders",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Pending orders retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Order"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/deliveries/{order}/assign": {
+            "post": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Assign an order to a delivery person",
+                "operationId": "df5e30aeac209b67af78b8f64cb4ef93",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "delivery_user_id"
+                                ],
+                                "properties": {
+                                    "delivery_user_id": {
+                                        "description": "ID of the delivery user",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order assigned successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Order or Delivery user not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/deliveries/my": {
+            "get": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Get deliveries assigned to the authenticated user",
+                "operationId": "7588b1710b79e368dde26652d27376ea",
+                "responses": {
+                    "200": {
+                        "description": "List of deliveries"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/deliveries/{order}/status": {
+            "put": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Update the delivery status of an order",
+                "operationId": "87ac72b6646f9cb07d9c89fc4e5bf8a1",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "EN_ROUTE",
+                                            "DELIVERED",
+                                            "FAILED"
+                                        ],
+                                        "example": "EN_ROUTE"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status updated successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/deliveries/location": {
+            "post": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Update the authenticated delivery person's current GPS location",
+                "operationId": "a9311624e529b78b043ffdf1fb70b7db",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "latitude",
+                                    "longitude"
+                                ],
+                                "properties": {
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 48.8584
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.2945
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Location updated successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Delivery role required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/deliveries/live/map": {
+            "get": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Get all active delivery persons' live locations for the admin map",
+                "operationId": "05aba8c7cb27856320d7387bcc142ff0",
+                "responses": {
+                    "200": {
+                        "description": "List of live locations"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin/Manager role required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/deliveries/{order}/proof": {
+            "post": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Uploads the proof of delivery (image/signature/QR) for an order",
+                "operationId": "d9e4a2930e06e32e86ffc071382d8694",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "proof_image": {
+                                        "description": "Image file (photo, signature, or QR)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "proof_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "photo",
+                                            "signature",
+                                            "qr"
+                                        ],
+                                        "example": "photo"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Proof uploaded successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/register": {
             "post": {
                 "tags": [
@@ -2366,7 +2676,7 @@
                 "tags": [
                     "Products"
                 ],
-                "summary": "Get vendor's products",
+                "summary": "Get vendor's products (Minimal Pagination)",
                 "operationId": "e1caf79623d4afd8e2e296f0c244e580",
                 "responses": {
                     "200": {
@@ -2375,11 +2685,23 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Products retrieved successfully"
+                                        },
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/Product"
+                                                "$ref": "#/components/schemas/ProductsForProduct"
                                             }
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 100
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 12
                                         }
                                     },
                                     "type": "object"
@@ -2403,7 +2725,7 @@
                 "tags": [
                     "Products"
                 ],
-                "summary": "Get vendor statistics",
+                "summary": "Get vendor statistics (Admin/Vendor)",
                 "operationId": "8fc21d52bf9442ce22f18079d9c2056d",
                 "responses": {
                     "200": {
@@ -2412,21 +2734,30 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "total_products": {
-                                            "type": "integer",
-                                            "example": 50
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Statistics retrieved successfully"
                                         },
-                                        "visible_products": {
-                                            "type": "integer",
-                                            "example": 45
-                                        },
-                                        "featured_products": {
-                                            "type": "integer",
-                                            "example": 10
-                                        },
-                                        "out_of_stock": {
-                                            "type": "integer",
-                                            "example": 5
+                                        "data": {
+                                            "properties": {
+                                                "total_products": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "visible_products": {
+                                                    "type": "integer",
+                                                    "example": 45
+                                                },
+                                                "featured_products": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "out_of_stock": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -2461,21 +2792,13 @@
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "client",
-                                "admin",
-                                "vendor",
-                                "delivery"
+                                "CLIENT",
+                                "ADMIN",
+                                "VENDOR",
+                                "DELIVERY",
+                                "MANAGER",
+                                "SUPERVISOR"
                             ]
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 1
                         }
                     },
                     {
@@ -2502,11 +2825,9 @@
                                                 "$ref": "#/components/schemas/User"
                                             }
                                         },
-                                        "links": {
-                                            "type": "object"
-                                        },
-                                        "meta": {
-                                            "type": "object"
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Users retrieved successfully"
                                         }
                                     },
                                     "type": "object"
@@ -2514,8 +2835,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized"
+                    "403": {
+                        "description": "Forbidden - Admin role required"
                     }
                 },
                 "security": [
@@ -2528,7 +2849,7 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Create a new user",
+                "summary": "Create a new user (Admin/Manager/Supervisor only)",
                 "operationId": "592819a0265360b2014512d6dbfaf0e7",
                 "requestBody": {
                     "required": true,
@@ -2544,12 +2865,12 @@
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "example": "John Doe"
+                                        "example": "Jane Doe"
                                     },
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "john@example.com"
+                                        "example": "jane@example.com"
                                     },
                                     "password": {
                                         "type": "string",
@@ -2564,12 +2885,22 @@
                                     "role": {
                                         "type": "string",
                                         "enum": [
-                                            "client",
-                                            "admin",
-                                            "vendor",
-                                            "delivery"
+                                            "CLIENT",
+                                            "ADMIN",
+                                            "VENDOR",
+                                            "DELIVERY",
+                                            "MANAGER",
+                                            "SUPERVISOR"
                                         ],
-                                        "example": "client"
+                                        "example": "CLIENT"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+33612345678"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Rue de Paris"
                                     }
                                 },
                                 "type": "object"
@@ -2588,7 +2919,7 @@
                                             "type": "string",
                                             "example": "User created successfully"
                                         },
-                                        "user": {
+                                        "data": {
                                             "$ref": "#/components/schemas/User"
                                         }
                                     },
@@ -2596,6 +2927,9 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin/Manager/Supervisor role required"
                     },
                     "422": {
                         "description": "Validation error"
@@ -2632,7 +2966,16 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User retrieved successfully"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -2651,7 +2994,7 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Update user",
+                "summary": "Update user (Admin/Manager/Supervisor only)",
                 "operationId": "b9091397c8b25f12c6adb74be6ce3a5a",
                 "parameters": [
                     {
@@ -2687,12 +3030,14 @@
                                     "role": {
                                         "type": "string",
                                         "enum": [
-                                            "client",
-                                            "admin",
-                                            "vendor",
-                                            "delivery"
+                                            "CLIENT",
+                                            "ADMIN",
+                                            "VENDOR",
+                                            "DELIVERY",
+                                            "MANAGER",
+                                            "SUPERVISOR"
                                         ],
-                                        "example": "admin"
+                                        "example": "ADMIN"
                                     },
                                     "password": {
                                         "type": "string",
@@ -2721,7 +3066,7 @@
                                             "type": "string",
                                             "example": "User updated successfully"
                                         },
-                                        "user": {
+                                        "data": {
                                             "$ref": "#/components/schemas/User"
                                         }
                                     },
@@ -2729,6 +3074,9 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin/Manager/Supervisor role required"
                     },
                     "422": {
                         "description": "Validation error"
@@ -2747,7 +3095,7 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Delete user",
+                "summary": "Delete user (Admin/Manager/Supervisor only)",
                 "operationId": "fa56cffde745d3f152f95cbacd936c0b",
                 "parameters": [
                     {
@@ -2776,6 +3124,9 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin/Manager/Supervisor role required"
                     },
                     "404": {
                         "description": "User not found"
@@ -2816,11 +3167,19 @@
                                         },
                                         "vendors_count": {
                                             "type": "integer",
-                                            "example": 20
+                                            "example": 15
                                         },
                                         "delivery_count": {
                                             "type": "integer",
                                             "example": 5
+                                        },
+                                        "managers_count": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "supervisors_count": {
+                                            "type": "integer",
+                                            "example": 2
                                         }
                                     },
                                     "type": "object"
@@ -3598,6 +3957,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Deliveries",
+            "description": "API Endpoints for Delivery Management and Logistics"
+        },
         {
             "name": "Auth",
             "description": "Opérations d'authentification et de gestion des utilisateurs."
