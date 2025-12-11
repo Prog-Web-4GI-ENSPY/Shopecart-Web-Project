@@ -10,6 +10,7 @@ use App\Http\Resources\ProductCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 /**
  * @OA\Tag(
@@ -166,6 +167,11 @@ class ProductController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        // Gestion de l'image (si présente)
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('products', 'public');
+            $validated['image'] = $path;
+        }
         // Les vendeurs ne peuvent créer que des produits visibles par défaut
         if ($user->isVendor()) {
             $validated['is_visible'] = true;
@@ -176,7 +182,7 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Product created successfully',
-            'product' => new ProductResource($product)
+            'data' => new ProductResource($product) // Utilisation de 'data'
         ], 201);
     }
 
@@ -231,7 +237,7 @@ class ProductController extends Controller
         if ($user->isVendor()) {
             // Ici vous pourriez ajouter une logique pour vérifier la propriété du produit
             // Pour l'instant, on autorise tous les vendeurs à modifier tous les produits
-            if (!$user->isAdmin() && !$user->isVendor()) {
+           if (!$user || (!$user->isAdmin() && !$user->isVendor())) {
                 return response()->json([
                     'message' => 'Access denied. Admin or Vendor role required.'
                 ], 403);
@@ -244,12 +250,28 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'compare_price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'sku' => 'nullable|string|unique:products,sku,' . $product->id,
+            'sku' => ['nullable', 'string', Rule::unique('products', 'sku')->ignore($product->id)],
             'category_id' => 'required|exists:categories,id',
             'is_visible' => 'boolean',
             'is_featured' => 'boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        // 1. Suppression de l'ancienne image si demandée
+        if ($request->boolean('remove_image') && $product->image) {
+            Storage::disk('public')->delete($product->image);
+            $validated['image'] = null;
+        }
+
+        // 2. Upload de la nouvelle image
+        if ($request->hasFile('image')) {
+            // Supprimer l'ancienne image si elle existe
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $path = $request->file('image')->store('products', 'public');
+            $validated['image'] = $path;
+        }
 
         $product->update($validated);
 
@@ -310,22 +332,25 @@ class ProductController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/products/vendor/my-products",
-     *     summary="Get vendor's products",
-     *     tags={"Products"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Vendor's products list",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Product"))
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Access denied. Vendor role required."
-     *     )
+     * path="/api/products/vendor/my-products",
+     * summary="Get vendor's products (Minimal Pagination)",
+     * tags={"Products"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Response(
+     * response=200,
+     * description="Vendor's products list",
+     * @OA\JsonContent(
+     * type="object",
+     * @OA\Property(property="message", type="string", example="Products retrieved successfully"),
+     * @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/ProductsForProduct")),
+     * @OA\Property(property="total", type="integer", example=100),
+     * @OA\Property(property="per_page", type="integer", example=12)
+     * )
+     * ),
+     * @OA\Response(
+     * response=403,
+     * description="Access denied. Vendor role required."
+     * )
      * )
      */
     public function myProducts(Request $request)
@@ -333,7 +358,7 @@ class ProductController extends Controller
         /** @var \App\Models\User $user */
         $user = auth()->user();
         
-        if (!$user->isVendor() && !$user->isAdmin()) {
+        if (!$user || (!$user->isVendor() && !$user->isAdmin())) {
             return response()->json([
                 'message' => 'Access denied. Vendor or Admin role required.'
             ], 403);
@@ -343,31 +368,41 @@ class ProductController extends Controller
         $products = Product::where('is_visible', true)
             ->orderBy('created_at', 'desc')
             ->paginate($request->get('per_page', 12));
-
-        return new ProductCollection($products);
+        
+        // Remplacement de ProductCollection pour un format de réponse minimal
+        return response()->json([
+            'message' => 'Products retrieved successfully',
+            'data' => ProductResource::collection($products->items()),
+            'total' => $products->total(),
+            'per_page' => $products->perPage(),
+            // Vous pouvez ajouter current_page, last_page si nécessaire, mais je les ai omis pour le "minimal"
+        ]);
     }
 
     /**
      * @OA\Get(
-     *     path="/api/products/vendor/stats",
-     *     summary="Get vendor statistics",
-     *     tags={"Products"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Vendor statistics",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="total_products", type="integer", example=50),
-     *             @OA\Property(property="visible_products", type="integer", example=45),
-     *             @OA\Property(property="featured_products", type="integer", example=10),
-     *             @OA\Property(property="out_of_stock", type="integer", example=5)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Access denied. Admin or Vendor role required."
-     *     )
+     * path="/api/products/vendor/stats",
+     * summary="Get vendor statistics (Admin/Vendor)",
+     * tags={"Products"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Response(
+     * response=200,
+     * description="Vendor statistics",
+     * @OA\JsonContent(
+     * type="object",
+     * @OA\Property(property="message", type="string", example="Statistics retrieved successfully"),
+     * @OA\Property(property="data", type="object",
+     * @OA\Property(property="total_products", type="integer", example=50),
+     * @OA\Property(property="visible_products", type="integer", example=45),
+     * @OA\Property(property="featured_products", type="integer", example=10),
+     * @OA\Property(property="out_of_stock", type="integer", example=5)
+     * )
+     * )
+     * ),
+     * @OA\Response(
+     * response=403,
+     * description="Access denied. Admin or Vendor role required."
+     * )
      * )
      */
     public function vendorStats()
@@ -381,6 +416,7 @@ class ProductController extends Controller
             ], 403);
         }
 
+        // Ici vous pourriez filtrer par vendeur si vous ajoutez un champ vendor_id aux produits
         $stats = [
             'total_products' => Product::count(),
             'visible_products' => Product::where('is_visible', true)->count(),
@@ -388,6 +424,9 @@ class ProductController extends Controller
             'out_of_stock' => Product::where('stock', 0)->count(),
         ];
 
-        return response()->json($stats);
+        return response()->json([
+            'message' => 'Statistics retrieved successfully',
+            'data' => $stats
+        ]);
     }
 }

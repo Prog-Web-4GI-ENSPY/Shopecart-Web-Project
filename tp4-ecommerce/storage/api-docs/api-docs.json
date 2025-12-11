@@ -2031,7 +2031,7 @@
                 "tags": [
                     "Products"
                 ],
-                "summary": "Get vendor's products",
+                "summary": "Get vendor's products (Minimal Pagination)",
                 "operationId": "e1caf79623d4afd8e2e296f0c244e580",
                 "responses": {
                     "200": {
@@ -2040,11 +2040,23 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Products retrieved successfully"
+                                        },
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/Product"
+                                                "$ref": "#/components/schemas/ProductsForProduct"
                                             }
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 100
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 12
                                         }
                                     },
                                     "type": "object"
@@ -2068,7 +2080,7 @@
                 "tags": [
                     "Products"
                 ],
-                "summary": "Get vendor statistics",
+                "summary": "Get vendor statistics (Admin/Vendor)",
                 "operationId": "8fc21d52bf9442ce22f18079d9c2056d",
                 "responses": {
                     "200": {
@@ -2077,21 +2089,30 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "total_products": {
-                                            "type": "integer",
-                                            "example": 50
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Statistics retrieved successfully"
                                         },
-                                        "visible_products": {
-                                            "type": "integer",
-                                            "example": 45
-                                        },
-                                        "featured_products": {
-                                            "type": "integer",
-                                            "example": 10
-                                        },
-                                        "out_of_stock": {
-                                            "type": "integer",
-                                            "example": 5
+                                        "data": {
+                                            "properties": {
+                                                "total_products": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "visible_products": {
+                                                    "type": "integer",
+                                                    "example": 45
+                                                },
+                                                "featured_products": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "out_of_stock": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
