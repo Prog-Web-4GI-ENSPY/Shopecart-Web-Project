@@ -244,13 +244,13 @@
                 ]
             }
         },
-        "/cart": {
+        "/api/cart": {
             "get": {
                 "tags": [
                     "Cart"
                 ],
                 "summary": "Get user's cart",
-                "operationId": "86f867f72e674aacd82942dcf38ba77e",
+                "operationId": "3a8631f1ac30c83b5ad826df8fda966f",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -258,8 +258,149 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
                                         "data": {
-                                            "$ref": "#/components/schemas/Cart"
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "nullable": true
+                                                },
+                                                "session_id": {
+                                                    "type": "string",
+                                                    "example": "abc123"
+                                                },
+                                                "items_count": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "total": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 99.99
+                                                },
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "quantity": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            },
+                                                            "unit_price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 29.99
+                                                            },
+                                                            "total": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 59.98
+                                                            },
+                                                            "product_variant": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "price": {
+                                                                        "type": "number",
+                                                                        "format": "float",
+                                                                        "example": 29.99
+                                                                    },
+                                                                    "stock": {
+                                                                        "type": "integer",
+                                                                        "example": 10
+                                                                    },
+                                                                    "product": {
+                                                                        "properties": {
+                                                                            "id": {
+                                                                                "type": "integer",
+                                                                                "example": 1
+                                                                            },
+                                                                            "name": {
+                                                                                "type": "string",
+                                                                                "example": "Product Name"
+                                                                            },
+                                                                            "slug": {
+                                                                                "type": "string",
+                                                                                "example": "product-name"
+                                                                            }
+                                                                        },
+                                                                        "type": "object"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Panier récupéré avec succès"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Create or get cart",
+                "operationId": "b432c7bbb8b06ea2019c3d37f23258ca",
+                "responses": {
+                    "200": {
+                        "description": "Cart retrieved or created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Panier récupéré"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
                                         }
                                     },
                                     "type": "object"
@@ -280,17 +421,53 @@
                 "tags": [
                     "Cart"
                 ],
-                "summary": "CReate Cart",
+                "summary": "Add item to cart",
                 "operationId": "c0e8ca78699ccc07858444da702d3ac5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_variant_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "product_variant_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "ICReate cart",
+                        "description": "Item added to cart",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Article ajouté au panier"
+                                        },
                                         "data": {
-                                            "$ref": "#/components/schemas/Cart"
+                                            "type": "object"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
                                         }
                                     },
                                     "type": "object"
@@ -299,7 +476,31 @@
                         }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur de validation"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 422
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -353,8 +554,20 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quantité mise à jour"
+                                        },
                                         "data": {
-                                            "$ref": "#/components/schemas/Cart"
+                                            "type": "object"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
                                         }
                                     },
                                     "type": "object"
@@ -362,8 +575,29 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Validation error"
+                    "404": {
+                        "description": "Cart item not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Article non trouvé dans votre panier"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -396,8 +630,44 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Article retiré du panier"
+                                        },
                                         "data": {
-                                            "$ref": "#/components/schemas/Cart"
+                                            "type": "object"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cart item not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Article non trouvé dans votre panier"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 404
                                         }
                                     },
                                     "type": "object"
@@ -427,11 +697,95 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "example": "Panier vidé avec succès"
                                         },
                                         "data": {
-                                            "$ref": "#/components/schemas/Cart"
+                                            "type": "object"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cart/user/{userId}/empty": {
+            "delete": {
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Empty user's cart (Admin only or self)",
+                "operationId": "30b4b3682e4ea427a01ca620dc8e5818",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cart emptied successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Panier vidé avec succès"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Non autorisé"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 403
                                         }
                                     },
                                     "type": "object"
@@ -458,6 +812,7 @@
                     {
                         "name": "cartId",
                         "in": "path",
+                        "description": "Cart ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -470,44 +825,156 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "cartId": {
-                                                "type": "integer",
-                                                "example": 5
-                                            },
-                                            "productVariantId": {
-                                                "type": "integer",
-                                                "example": 10
-                                            },
-                                            "quantity": {
-                                                "type": "integer",
-                                                "example": 2
-                                            },
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time"
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time"
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "cart_id": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "product_variant_id": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "quantity": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "unit_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 29.99
+                                                    },
+                                                    "total": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 59.98
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "product_variant": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 29.99
+                                                            },
+                                                            "stock": {
+                                                                "type": "integer",
+                                                                "example": 50
+                                                            },
+                                                            "product": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "Product Name"
+                                                                    },
+                                                                    "description": {
+                                                                        "type": "string",
+                                                                        "example": "Product description"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
                                             }
                                         },
-                                        "type": "object"
-                                    }
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Articles du panier récupérés"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized access",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé à ce panier"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 403
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
                     "404": {
-                        "description": "Cart not found"
+                        "description": "Cart not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Panier non trouvé"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/cartItems/{cartItemId}": {
@@ -535,31 +1002,82 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "cartId": {
-                                            "type": "integer",
-                                            "example": 5
-                                        },
-                                        "productVariantId": {
-                                            "type": "integer",
-                                            "example": 10
-                                        },
-                                        "quantity": {
-                                            "type": "integer",
-                                            "example": 2
-                                        },
-                                        "created_at": {
+                                        "status": {
                                             "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-11-13T12:00:00Z"
+                                            "example": "success"
                                         },
-                                        "updated_at": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "cart_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "product_variant_id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "unit_price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 29.99
+                                                },
+                                                "total": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 59.98
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-13T12:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-13T12:05:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
                                             "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-11-13T12:05:00Z"
+                                            "example": "Article récupéré avec succès"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé à cet article"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 403
                                         }
                                     },
                                     "type": "object"
@@ -570,7 +1088,12 @@
                     "404": {
                         "description": "Cart item not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -597,19 +1120,19 @@
                             "schema": {
                                 "required": [
                                     "quantity",
-                                    "cartId",
-                                    "productVariantId"
+                                    "cart_id",
+                                    "product_variant_id"
                                 ],
                                 "properties": {
                                     "quantity": {
                                         "type": "integer",
                                         "example": 3
                                     },
-                                    "cartId": {
+                                    "cart_id": {
                                         "type": "integer",
                                         "example": 5
                                     },
-                                    "productVariantId": {
+                                    "product_variant_id": {
                                         "type": "integer",
                                         "example": 10
                                     }
@@ -626,40 +1149,44 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
                                         "message": {
                                             "type": "string",
-                                            "example": "Cart item updated successfully"
+                                            "example": "Article mis à jour avec succès"
                                         },
-                                        "cartItem": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "cartId": {
-                                                    "type": "integer",
-                                                    "example": 5
-                                                },
-                                                "productVariantId": {
-                                                    "type": "integer",
-                                                    "example": 10
-                                                },
-                                                "quantity": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-11-13T12:00:00Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-11-13T12:05:00Z"
-                                                }
-                                            },
+                                        "data": {
                                             "type": "object"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé à cet article"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 403
                                         }
                                     },
                                     "type": "object"
@@ -668,9 +1195,17 @@
                         }
                     },
                     "404": {
-                        "description": "Cart item or product variant not found"
+                        "description": "Cart item not found"
+                    },
+                    "422": {
+                        "description": "Validation error or insufficient stock"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -691,12 +1226,83 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Cart item deleted successfully"
+                        "description": "Cart item deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Article supprimé du panier"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé à cet article"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 403
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Cart item not found"
+                        "description": "Cart item not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Article non trouvé"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/cartItems": {
@@ -713,19 +1319,19 @@
                             "schema": {
                                 "required": [
                                     "quantity",
-                                    "cartId",
-                                    "productVariantId"
+                                    "cart_id",
+                                    "product_variant_id"
                                 ],
                                 "properties": {
                                     "quantity": {
                                         "type": "integer",
                                         "example": 2
                                     },
-                                    "cartId": {
+                                    "cart_id": {
                                         "type": "integer",
                                         "example": 5
                                     },
-                                    "productVariantId": {
+                                    "product_variant_id": {
                                         "type": "integer",
                                         "example": 10
                                     }
@@ -742,31 +1348,20 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "cartId": {
-                                            "type": "integer",
-                                            "example": 5
-                                        },
-                                        "productVariantId": {
-                                            "type": "integer",
-                                            "example": 10
-                                        },
-                                        "quantity": {
-                                            "type": "integer",
-                                            "example": 2
-                                        },
-                                        "created_at": {
+                                        "status": {
                                             "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-11-13T12:00:00Z"
+                                            "example": "success"
                                         },
-                                        "updated_at": {
+                                        "data": {
+                                            "type": "object"
+                                        },
+                                        "message": {
                                             "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-11-13T12:05:00Z"
+                                            "example": "Article ajouté au panier"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
                                         }
                                     },
                                     "type": "object"
@@ -774,13 +1369,63 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Product variant not found"
+                    "403": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé à ce panier"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 403
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation error or insufficient stock",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "nullable": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 422
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/categories": {
@@ -2427,6 +3072,19 @@
                         "type": "integer",
                         "format": "int64"
                     },
+                    "session_id": {
+                        "description": "ID de session pour les utilisateurs non connectés.",
+                        "type": "string"
+                    },
+                    "items_count": {
+                        "description": "Nombre total d'articles dans le panier.",
+                        "type": "integer"
+                    },
+                    "total": {
+                        "description": "Prix total du panier.",
+                        "type": "number",
+                        "format": "float"
+                    },
                     "items": {
                         "description": "Liste des articles dans le panier.",
                         "type": "array",
@@ -2434,26 +3092,45 @@
                             "$ref": "#/components/schemas/CartItem"
                         }
                     },
-                    "total_price": {
-                        "description": "Prix total du panier.",
-                        "type": "number",
-                        "format": "float"
+                    "created_at": {
+                        "description": "Date de création",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Date de mise à jour",
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object",
                 "example": {
                     "id": 1,
                     "user_id": 101,
+                    "session_id": "abc123def456",
+                    "items_count": 3,
+                    "total": 149.97,
                     "items": [],
-                    "total_price": 49.99
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T10:35:00Z"
                 }
             },
             "CartItem": {
                 "title": "CartItem",
                 "description": "Modèle de données pour un article dans un panier.",
                 "properties": {
-                    "product_id": {
-                        "description": "ID du produit.",
+                    "id": {
+                        "description": "ID unique de l'article",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "cart_id": {
+                        "description": "ID du panier",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "product_variant_id": {
+                        "description": "ID de la variante du produit",
                         "type": "integer",
                         "format": "int64"
                     },
@@ -2465,13 +3142,36 @@
                         "description": "Prix unitaire au moment de l'ajout.",
                         "type": "number",
                         "format": "float"
+                    },
+                    "total": {
+                        "description": "Prix total pour cet article",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "created_at": {
+                        "description": "Date de création",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Date de mise à jour",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "product_variant": {
+                        "$ref": "#/components/schemas/ProductVariant"
                     }
                 },
                 "type": "object",
                 "example": {
-                    "product_id": 5,
+                    "id": 1,
+                    "cart_id": 5,
+                    "product_variant_id": 10,
                     "quantity": 2,
-                    "unit_price": 24.99
+                    "unit_price": 24.99,
+                    "total": 49.98,
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T10:35:00Z"
                 }
             },
             "Category": {
@@ -2776,6 +3476,58 @@
                 },
                 "type": "object"
             },
+            "ProductVariant": {
+                "title": "ProductVariant",
+                "description": "Modèle de données pour une variante de produit",
+                "properties": {
+                    "id": {
+                        "description": "ID unique",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "product_id": {
+                        "description": "ID du produit parent",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "description": "Nom de la variante",
+                        "type": "string"
+                    },
+                    "sku": {
+                        "description": "Code SKU",
+                        "type": "string"
+                    },
+                    "price": {
+                        "description": "Prix",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "stock": {
+                        "description": "Quantité en stock",
+                        "type": "integer"
+                    },
+                    "attributes": {
+                        "description": "Attributs de la variante (couleur, taille, etc.)",
+                        "type": "object"
+                    },
+                    "product": {
+                        "$ref": "#/components/schemas/Product"
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "id": 1,
+                    "product_id": 5,
+                    "name": "T-Shirt Rouge - L",
+                    "sku": "TSH-RED-L",
+                    "price": 29.99,
+                    "stock": 50,
+                    "attributes": {
+                        "color": "red",
+                        "size": "L"
+                    }
+                }
+            },
             "User": {
                 "title": "User",
                 "description": "Modèle de données pour un utilisateur",
@@ -2808,7 +3560,12 @@
                         "type": "string",
                         "enum": [
                             "USER",
-                            "ADMIN"
+                            "ADMIN",
+                            "VENDOR",
+                            "CLIENT",
+                            "DELIVERY",
+                            "MANAGER",
+                            "SUPERVISOR"
                         ]
                     },
                     "created_at": {

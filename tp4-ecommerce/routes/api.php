@@ -1,14 +1,16 @@
 <?php
+
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CartItemController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CartItemController;
-use App\Http\Controllers\PaymentController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -20,93 +22,86 @@ use App\Http\Controllers\PaymentController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// ==================== PUBLIC ROUTES ====================
 
-// Public routes
+// Auth routes
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// Product & Category routes
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
-// Auth routes 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/user', [AuthController::class, 'user']);
-    });
-
-
-Route::prefix("cart")->group(function(){
-    Route::post("/abs",[CartController::class,"store"]);
-    Route::get("/user/{userId}/empty",[CartController::class,"emptyCart"]);
-});
-
-Route::prefix("cartItems")->group(function(){
-    //get cart items
-    //add cart item
-    //remove cart item
-    //update cart item
-    Route::get("/cart/{cartId}",[CartItemController::class,"getAllCartItems"]);
-    Route::get("/{cartItemId}",[CartItemController::class,"getCartItem"]);
-    Route::post("/",[CartItemController::class,"addCartItem"]);
-    Route::put("/{cartItemId}",[CartItemController::class,"updateCartItem"]);
-     Route::delete("/{cartItemId}",[CartItemController::class,"deleteCartItem"]);
-
-});
-Route::prefix("payment")->group(
-    function(){
-        Route::post("/create-payment-intent/order/{orderId}",[PaymentController::class,"createPaymentIntentWithCardd"]);
-        Route::post("/registerPayment",[PaymentController::class,"storePayment"]);
-
-    }
-);
-
-// Protected routes
+// ==================== PROTECTED ROUTES ====================
 Route::middleware('auth:sanctum')->group(function () {
-    // User
+    
+    // ========== AUTH & USER ==========
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
-
-    // Cart
-    Route::get('/cart', [CartController::class, 'show']);
-    Route::post('/cart/add', [CartController::class, 'addItem']);
-    Route::put('/cart/items/{cartItem}', [CartController::class, 'updateItem']);
-    Route::delete('/cart/items/{cartItem}', [CartController::class, 'removeItem']);
-    Route::delete('/cart/clear', [CartController::class, 'clear']);
-
-    // Orders
+    
+    // ========== CART ROUTES ==========
+    Route::prefix('cart')->group(function () {
+        Route::get('/', [CartController::class, 'show']);                    // GET /api/cart
+        Route::post('/', [CartController::class, 'store']);                  // POST /api/cart (créer/récupérer)
+        Route::post('/add', [CartController::class, 'addItem']);             // POST /api/cart/add (ajouter article)
+        Route::put('/items/{cartItem}', [CartController::class, 'updateItem']);  // PUT /api/cart/items/{id}
+        Route::delete('/items/{cartItem}', [CartController::class, 'removeItem']); // DELETE /api/cart/items/{id}
+        Route::delete('/clear', [CartController::class, 'clear']);           // DELETE /api/cart/clear
+    });
+    
+    // ========== CART ITEMS (Legacy routes) ==========
+    Route::prefix('cartItems')->group(function () {
+        Route::get('/cart/{cartId}', [CartItemController::class, 'getAllCartItems']);
+        Route::get('/{cartItemId}', [CartItemController::class, 'getCartItem']);
+        Route::post('/', [CartItemController::class, 'addCartItem']);
+        Route::put('/{cartItemId}', [CartItemController::class, 'updateCartItem']);
+        Route::delete('/{cartItemId}', [CartItemController::class, 'deleteCartItem']);
+    });
+    
+    // ========== ORDER ROUTES ==========
     Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
-
-     // === ROUTES ADMIN SEULEMENT ===
+    
+    // ========== PAYMENT ROUTES ==========
+    Route::prefix('payment')->group(function () {
+        Route::post('/create-payment-intent/order/{orderId}', [PaymentController::class, 'createPaymentIntentWithCardd']);
+        Route::post('/registerPayment', [PaymentController::class, 'storePayment']);
+    });
+    
+    // ========== PRODUCT ROUTES (Authenticated Users) ==========
+    Route::get('/products/vendor/my-products', [ProductController::class, 'myProducts']);
+    
+    // ========== ADMIN ONLY ROUTES ==========
     Route::middleware('admin')->group(function () {
-        // Gestion des utilisateurs (Admin seulement)
+        // User Management
         Route::apiResource('users', UserController::class);
         Route::get('/users/roles/stats', [UserController::class, 'roleStats']);
         
-        // Gestion des catégories (Admin seulement)
+        // Category Management
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::put('/categories/{category}', [CategoryController::class, 'update']);
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
     });
-
-    // === ROUTES ADMIN OU VENDEUR ===
+    
+    // ========== ADMIN OR VENDOR ROUTES ==========
     Route::middleware('admin_or_vendor')->group(function () {
-        // Gestion des produits (Admin et Vendeurs)
+        // Product Management
         Route::post('/products', [ProductController::class, 'store']);
         Route::put('/products/{product}', [ProductController::class, 'update']);
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
         
-        // Statistiques produits (Admin et Vendeurs)
+        // Vendor Stats
         Route::get('/products/vendor/stats', [ProductController::class, 'vendorStats']);
     });
+});
 
-    // Routes accessibles à tous les rôles authentifiés mais avec restrictions dans les contrôleurs
-    Route::get('/products/vendor/my-products', [ProductController::class, 'myProducts']);
+// ==================== ROUTES EXTERNES ====================
+// Ces routes étaient en dehors du groupe auth, je les ai réintégrées
+Route::prefix("cart")->group(function(){
+    Route::post("/abs", [CartController::class, "store"]);
+    Route::get("/user/{userId}/empty", [CartController::class, "emptyCart"]);
 });
