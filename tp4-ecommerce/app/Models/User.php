@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Builder; // Import de Builder pour le type hint
 
 /**
  * @OA\Schema(
@@ -35,7 +36,7 @@ use Laravel\Sanctum\HasApiTokens;
  * format="string",
  * description="Numero de telephone"
  * ),
- *  * @OA\Property(
+ * * @OA\Property(
  * property="address",
  * type="string",
  * format="string",
@@ -45,7 +46,7 @@ use Laravel\Sanctum\HasApiTokens;
  * property="role",
  * type="string",
  * description="Rôle de l'utilisateur (ex: USER, ADMIN)",
- * enum={"USER", "ADMIN"}
+ * enum={"USER", "ADMIN", "VENDOR", "CLIENT", "DELIVERY", "MANAGER", "SUPERVISOR"} // J'ai mis à jour l'enum pour inclure tous les rôles
  * ),
  * @OA\Property(
  * property="created_at",
@@ -65,10 +66,13 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    // Définition des constantes de rôles
     const ROLE_ADMIN = 'ADMIN';
     const ROLE_VENDOR = 'VENDOR';
-    const ROLE_CLIENT = 'USER';
+    const ROLE_CLIENT = 'CUSTOMER';
     const ROLE_DELIVERY = 'DELIVERY';
+    const ROLE_MANAGER = 'MANAGER';
+    const ROLE_SUPERVISOR = 'SUPERVISOR';
 
     /**
      * The attributes that are mass assignable.
@@ -143,32 +147,53 @@ class User extends Authenticatable
 
     public function isClient(): bool
     {
-        return $this->role === self::ROLE_CLIENT;
+        // Utilise la constante ROLE_CLIENT (CUSTOMER)
+        return $this->role === self::ROLE_CLIENT; 
+    }
+
+    public function isSupervisor(): bool
+    {
+        return $this->role === self::ROLE_SUPERVISOR;
+    }
+    public function isManager(): bool
+    {
+        return $this->role === self::ROLE_MANAGER;
     }
 
     /**
-     * Scope pour filtrer par rôle
+     * Scope pour filtrer par rôle (méthode scope[NomDuScope])
+     * @param Builder $query
+     * @return Builder
      */
-    public function scopeAdmins($query)
+    public function scopeAdmins(Builder $query): Builder
     {
         return $query->where('role', self::ROLE_ADMIN);
     }
 
-    public function scopeVendors($query)
+    public function scopeVendors(Builder $query): Builder
     {
         return $query->where('role', self::ROLE_VENDOR);
     }
 
-    public function scopeDelivery($query)
+    public function scopeDelivery(Builder $query): Builder
     {
         return $query->where('role', self::ROLE_DELIVERY);
     }
 
-    public function scopeClients($query)
+    public function scopeClients(Builder $query): Builder
     {
-        return $query->where('role', self::ROLE_CLIENT);
+        // Utilise la constante ROLE_CLIENT (CUSTOMER)
+        return $query->where('role', self::ROLE_CLIENT); 
+    }
+    
+    // NOUVEAUX SCOPES AJOUTÉS
+    public function scopeManagers(Builder $query): Builder
+    {
+        return $query->where('role', self::ROLE_MANAGER);
     }
 
-
+    public function scopeSupervisors(Builder $query): Builder
+    {
+        return $query->where('role', self::ROLE_SUPERVISOR);
+    }
 }
-
