@@ -135,6 +135,12 @@ Route::middleware('auth:sanctum')->group(function () {
         // Preuve de livraison (React Native)
         Route::post('{order}/proof', 'uploadProof');
         Route::get('{order}/proof', 'getProof');
+
+        // Notifications Push - Enregistrement du Token FCM
+    Route::post('user/fcm-token', [UserController::class, 'updateFcmToken']);
+
+    // Historique des Livraisons
+    Route::get('deliveries/history', [DeliveryController::class, 'getDeliveryHistory']);
     });
 
     // === ROUTES ADMIN OU VENDEUR ===

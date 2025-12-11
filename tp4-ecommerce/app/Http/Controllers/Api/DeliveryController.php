@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\OrderResource;
 
 /**
  * @OA\Tag(
@@ -412,5 +413,45 @@ class DeliveryController extends Controller
                 'proof_type' => $order->proof_type,
             ]
         ]);
+    }
+
+    /**
+     * @OA\Get(
+     * path="/api/deliveries/history",
+     * summary="Affiche l'historique des livraisons terminées (Livré, Échec) pour le livreur connecté.",
+     * tags={"Deliveries"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Response(
+     * response=200,
+     * description="Liste des commandes terminées.",
+     * @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/OrderResource"))
+     * ),
+     * @OA\Response(response=401, description="Non authentifié."),
+     * @OA\Response(response=403, description="Accès refusé (non-livreur).")
+     * )
+     */
+    public function getDeliveryHistory(Request $request)
+    {
+        $user = $request->user();
+
+        // Sécurité : S'assurer que seul un livreur peut accéder à cette route
+        if ($user->role !== 'DELIVERY') {
+            return response()->json(['message' => 'Forbidden. Only delivery personnel can access this resource.'], 403);
+        }
+
+        // 1. Définir les statuts considérés comme terminés
+        $finalStatuses = [
+            Order::STATUS_DELIVERED, 
+            Order::STATUS_FAILED,    
+        ];
+
+        // 2. Récupérer l'historique
+        $history = Order::where('delivery_user_id', $user->id)
+                        ->whereIn('status', $finalStatuses)
+                        ->orderByDesc('updated_at')
+                        ->paginate(15); // Pagination recommandée pour les listes
+
+        // 3. Retourner la collection via la ressource
+        return OrderResource::collection($history);
     }
 }

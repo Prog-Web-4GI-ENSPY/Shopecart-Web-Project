@@ -426,4 +426,40 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     * path="/api/user/fcm-token",
+     * summary="Enregistre le token Firebase Cloud Messaging (FCM) de l'utilisateur pour les notifications Push.",
+     * tags={"Users"},
+     * security={{"bearerAuth":{}}},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"fcm_token"},
+     * @OA\Property(property="fcm_token", type="string", description="Le token FCM unique de l'appareil mobile.")
+     * )
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Token FCM enregistré avec succès.",
+     * @OA\JsonContent(type="string", example="FCM token updated successfully.")
+     * ),
+     * @OA\Response(response=401, description="Non authentifié.")
+     * )
+     */
+    public function updateFcmToken(Request $request)
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        $user = $request->user();
+
+        // 1. Mise à jour de la colonne dans la base de données
+        // ASSUMPTION: La colonne 'fcm_token' existe sur la table 'users'
+        $user->fcm_token = $request->fcm_token;
+        $user->save();
+
+        return response()->json(['message' => 'FCM token updated successfully.'], 200);
+    }
 }

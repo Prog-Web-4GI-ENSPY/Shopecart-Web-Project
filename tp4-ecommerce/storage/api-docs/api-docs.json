@@ -624,6 +624,41 @@
                 ]
             }
         },
+        "/api/deliveries/history": {
+            "get": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Affiche l'historique des livraisons terminées (Livré, Échec) pour le livreur connecté.",
+                "operationId": "a8e060acca5eb87a6660c2247f1178b9",
+                "responses": {
+                    "200": {
+                        "description": "Liste des commandes terminées.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OrderResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié."
+                    },
+                    "403": {
+                        "description": "Accès refusé (non-livreur)."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/register": {
             "post": {
                 "tags": [
@@ -2958,6 +2993,55 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user/fcm-token": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Enregistre le token Firebase Cloud Messaging (FCM) de l'utilisateur pour les notifications Push.",
+                "operationId": "73b44c776d6f32bd2912b74287c1189c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "fcm_token"
+                                ],
+                                "properties": {
+                                    "fcm_token": {
+                                        "description": "Le token FCM unique de l'appareil mobile.",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token FCM enregistré avec succès.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "FCM token updated successfully."
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié."
                     }
                 },
                 "security": [
