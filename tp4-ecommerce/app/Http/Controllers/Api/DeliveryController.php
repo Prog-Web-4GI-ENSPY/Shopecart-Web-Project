@@ -211,4 +211,146 @@ class DeliveryController extends Controller
             'data' => $order
         ]);
     }
+
+
+    /**
+     * @OA\Post(
+     * path="/api/deliveries/location",
+     * summary="Update the authenticated delivery person's current GPS location",
+     * tags={"Deliveries"},
+     * security={{"bearerAuth":{}}},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"latitude", "longitude"},
+     * @OA\Property(property="latitude", type="number", format="float", example=48.8584),
+     * @OA\Property(property="longitude", type="number", format="float", example=2.2945)
+     * )
+     * ),
+     * @OA\Response(response=200, description="Location updated successfully"),
+     * @OA\Response(response=403, description="Forbidden - Delivery role required")
+     * )
+     */
+    public function updateLocation(Request $request)
+    {
+        $user = auth()->user();
+
+        // Restriction : Seul le rôle DELIVERY
+        if (!$user->isDelivery()) {
+            return response()->json(['message' => 'Access denied. Delivery role required.'], 403);
+        }
+
+        $validated = $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+        ]);
+        
+        // Utilise l'upsert pour créer/mettre à jour la dernière position de l'utilisateur
+        // Si l'utilisateur existe déjà, la ligne est mise à jour. Sinon, elle est créée.
+        $location = $user->geolocation()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'latitude' => $validated['latitude'],
+                'longitude' => $validated['longitude'],
+            ]
+        );
+
+        // TODO: Implémenter WebSockets/Pusher ici pour notifier l'app Angular en temps réel !
+
+        return response()->json([
+            'message' => 'Location updated successfully',
+            'data' => $location
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     * path="/api/deliveries/live/map",
+     * summary="Get all active delivery persons' live locations for the admin map",
+     * tags={"Deliveries"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Response(response=200, description="List of live locations"),
+     * @OA\Response(response=403, description="Forbidden - Admin/Manager role required")
+     * )
+     */
+    public function getLiveLocations()
+    {
+        // Restriction : Seuls les rôles gérant la logistique (Admin, Manager, Supervisor)
+        if (!auth()->user()->isAdmin() && !auth()->user()->isManager() && !auth()->user()->isSupervisor()) {
+            return response()->json(['message' => 'Access denied.'], 403);
+        }
+
+        // Récupère toutes les dernières géolocalisations des utilisateurs qui sont livreurs
+        $liveLocations = \App\Models\DeliveryGeolocation::with('user')
+            ->whereHas('user', function ($query) {
+                $query->where('role', User::ROLE_DELIVERY);
+            })
+            ->get();
+
+        return response()->json([
+            'message' => 'Live locations retrieved successfully',
+            'data' => $liveLocations
+        ]);
+    }
+
+
+    /**
+     * @OA\Post(
+     * path="/api/deliveries/{order}/proof",
+     * summary="Uploads the proof of delivery (image/signature/QR) for an order",
+     * tags={"Deliveries"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Parameter(
+     * name="order",
+     * in="path",
+     * required=true,
+     * description="Order ID",
+     * @OA\Schema(type="integer")
+     * ),
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\MediaType(
+     * mediaType="multipart/form-data",
+     * @OA\Schema(
+     * @OA\Property(property="proof_image", type="string", format="binary", description="Image file (photo, signature, or QR)"),
+     * @OA\Property(property="proof_type", type="string", enum={"photo", "signature", "qr"}, example="photo")
+     * )
+     * )
+     * ),
+     * @OA\Response(response=200, description="Proof uploaded successfully"),
+     * @OA\Response(response=403, description="Forbidden"),
+     * @OA\Response(response=422, description="Validation error")
+     * )
+     */
+    public function uploadProof(Request $request, Order $order)
+    {
+        $user = auth()->user();
+
+        // Restriction : Seul le livreur assigné peut uploader la preuve
+        if (!$user->isDelivery() || $order->delivery_user_id !== $user->id) {
+            return response()->json(['message' => 'Access denied. Not the assigned delivery person.'], 403);
+        }
+
+        $validated = $request->validate([
+            'proof_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // 2MB max
+            'proof_type' => ['required', Rule::in(['photo', 'signature', 'qr'])],
+        ]);
+
+        if ($request->hasFile('proof_image')) {
+            // Stocke l'image dans le dossier 'proofs' du disque 'public'
+            $path = $request->file('proof_image')->store('proofs', 'public');
+            
+            $order->update([
+                'proof_path' => $path,
+                'proof_type' => $validated['proof_type'],
+                'status' => 'DELIVERED', // Optionnel : Marquer comme livré après la preuve, ou le laisser en 'EN_ROUTE'
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Proof of delivery uploaded successfully.',
+            'data' => $order
+        ]);
+    }
+
 }

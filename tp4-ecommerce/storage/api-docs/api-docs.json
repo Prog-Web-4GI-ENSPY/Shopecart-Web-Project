@@ -193,6 +193,138 @@
                 ]
             }
         },
+        "/api/deliveries/location": {
+            "post": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Update the authenticated delivery person's current GPS location",
+                "operationId": "a9311624e529b78b043ffdf1fb70b7db",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "latitude",
+                                    "longitude"
+                                ],
+                                "properties": {
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 48.8584
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.2945
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Location updated successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Delivery role required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/deliveries/live/map": {
+            "get": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Get all active delivery persons' live locations for the admin map",
+                "operationId": "05aba8c7cb27856320d7387bcc142ff0",
+                "responses": {
+                    "200": {
+                        "description": "List of live locations"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin/Manager role required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/deliveries/{order}/proof": {
+            "post": {
+                "tags": [
+                    "Deliveries"
+                ],
+                "summary": "Uploads the proof of delivery (image/signature/QR) for an order",
+                "operationId": "d9e4a2930e06e32e86ffc071382d8694",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "proof_image": {
+                                        "description": "Image file (photo, signature, or QR)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "proof_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "photo",
+                                            "signature",
+                                            "qr"
+                                        ],
+                                        "example": "photo"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Proof uploaded successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/register": {
             "post": {
                 "tags": [

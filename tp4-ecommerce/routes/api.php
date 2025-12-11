@@ -112,7 +112,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('my', 'getMyDeliveries');
         Route::put('{order}/status', 'updateStatus');
         
-        // Les routes pour le GPS et la preuve de livraison seront ajoutées plus tard
+        // Géolocalisation (React Native)
+        Route::post('location', 'updateLocation'); 
+
+        // Suivi en temps réel (Angular)
+        Route::get('live/map', 'getLiveLocations');
+
+        // Preuve de livraison (React Native)
+        Route::post('{order}/proof', 'uploadProof');
     });
 
     // === ROUTES ADMIN OU VENDEUR ===

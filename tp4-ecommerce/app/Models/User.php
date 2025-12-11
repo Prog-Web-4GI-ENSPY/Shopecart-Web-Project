@@ -197,4 +197,12 @@ class User extends Authenticatable
     {
         return $query->where('role', self::ROLE_SUPERVISOR);
     }
+
+    /**
+ * L'utilisateur a une (dernière) géolocalisation.
+ */
+public function geolocation()
+{
+    return $this->hasOne(DeliveryGeolocation::class);
+}
 }
