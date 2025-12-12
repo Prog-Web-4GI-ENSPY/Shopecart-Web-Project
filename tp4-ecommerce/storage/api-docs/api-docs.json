@@ -2776,6 +2776,362 @@
                 ]
             }
         },
+        "/api/products/{product}/variants": {
+            "get": {
+                "tags": [
+                    "Product Variants"
+                ],
+                "summary": "Get all variants for a product",
+                "operationId": "e90de3bd67ba1bf646a47827c51d16f5",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "Product ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of product variants",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ProductVariant"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Variantes récupérées"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Product Variants"
+                ],
+                "summary": "Create a new product variant",
+                "operationId": "051d0e4aa749f3cbbfbd48c99ed4c858",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "Product ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "sku",
+                                    "price",
+                                    "stock",
+                                    "color"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "T-Shirt Rouge - L"
+                                    },
+                                    "sku": {
+                                        "type": "string",
+                                        "example": "TSH-RED-L"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 29.99
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 50
+                                    },
+                                    "color": {
+                                        "type": "string",
+                                        "example": "red"
+                                    },
+                                    "attributes": {
+                                        "type": "object",
+                                        "example": {
+                                            "color": "red",
+                                            "size": "L"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Variant created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProductVariant"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Variante créée avec succès"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 201
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/variants/{variant}": {
+            "get": {
+                "tags": [
+                    "Product Variants"
+                ],
+                "summary": "Get a specific product variant",
+                "operationId": "0791cdb66cdb7e85bc8a58e669901d43",
+                "parameters": [
+                    {
+                        "name": "variant",
+                        "in": "path",
+                        "description": "Variant ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Variant details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProductVariant"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Variante récupérée"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Variant not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Product Variants"
+                ],
+                "summary": "Update a product variant",
+                "operationId": "f9cf7229da6ae190281e7895f9736285",
+                "parameters": [
+                    {
+                        "name": "variant",
+                        "in": "path",
+                        "description": "Variant ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "T-Shirt Rouge - L"
+                                    },
+                                    "sku": {
+                                        "type": "string",
+                                        "example": "TSH-RED-L"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 29.99
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 50
+                                    },
+                                    "color": {
+                                        "type": "string",
+                                        "example": "red"
+                                    },
+                                    "attributes": {
+                                        "type": "object",
+                                        "example": {
+                                            "color": "red",
+                                            "size": "L"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Variant updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProductVariant"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Variante mise à jour"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Product Variants"
+                ],
+                "summary": "Delete a product variant",
+                "operationId": "d7f2c667c701dfba05c62226075a0eb6",
+                "parameters": [
+                    {
+                        "name": "variant",
+                        "in": "path",
+                        "description": "Variant ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Variant deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Variante supprimée"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Variant not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/users": {
             "get": {
                 "tags": [
@@ -3488,8 +3844,8 @@
                         "type": "integer",
                         "format": "int64"
                     },
-                    "product_variant_id": {
-                        "description": "ID de la variante du produit",
+                    "product_id": {
+                        "description": "ID du produit (ou variante) - À CHANGER",
                         "type": "integer",
                         "format": "int64"
                     },
@@ -3516,16 +3872,13 @@
                         "description": "Date de mise à jour",
                         "type": "string",
                         "format": "date-time"
-                    },
-                    "product_variant": {
-                        "$ref": "#/components/schemas/ProductVariant"
                     }
                 },
                 "type": "object",
                 "example": {
                     "id": 1,
                     "cart_id": 5,
-                    "product_variant_id": 10,
+                    "product_id": 10,
                     "quantity": 2,
                     "unit_price": 24.99,
                     "total": 49.98,
@@ -3838,13 +4191,21 @@
             "ProductVariant": {
                 "title": "ProductVariant",
                 "description": "Modèle de données pour une variante de produit",
+                "required": [
+                    "productId",
+                    "name",
+                    "sku",
+                    "price",
+                    "stock",
+                    "color"
+                ],
                 "properties": {
                     "id": {
                         "description": "ID unique",
                         "type": "integer",
                         "format": "int64"
                     },
-                    "product_id": {
+                    "productId": {
                         "description": "ID du produit parent",
                         "type": "integer"
                     },
@@ -3865,26 +4226,43 @@
                         "description": "Quantité en stock",
                         "type": "integer"
                     },
+                    "color": {
+                        "description": "Couleur",
+                        "type": "string"
+                    },
                     "attributes": {
-                        "description": "Attributs de la variante (couleur, taille, etc.)",
+                        "description": "Attributs de la variante",
                         "type": "object"
                     },
-                    "product": {
-                        "$ref": "#/components/schemas/Product"
+                    "image": {
+                        "description": "Image de la variante",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object",
                 "example": {
                     "id": 1,
-                    "product_id": 5,
+                    "productId": 5,
                     "name": "T-Shirt Rouge - L",
                     "sku": "TSH-RED-L",
                     "price": 29.99,
                     "stock": 50,
+                    "color": "red",
                     "attributes": {
                         "color": "red",
                         "size": "L"
-                    }
+                    },
+                    "image": "tshirt-red-l.jpg",
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T10:35:00Z"
                 }
             },
             "User": {
@@ -3996,6 +4374,10 @@
         {
             "name": "Products",
             "description": "Products"
+        },
+        {
+            "name": "Product Variants",
+            "description": "Product Variants"
         }
     ]
 }

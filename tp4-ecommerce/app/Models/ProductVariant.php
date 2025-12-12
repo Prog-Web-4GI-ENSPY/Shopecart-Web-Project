@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  *     schema="ProductVariant",
  *     title="ProductVariant",
  *     description="Modèle de données pour une variante de produit",
+ *     required={"productId", "name", "sku", "price", "stock", "color"},
  *     @OA\Property(
  *         property="id",
  *         type="integer",
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  *         description="ID unique"
  *     ),
  *     @OA\Property(
- *         property="product_id",
+ *         property="productId",
  *         type="integer",
  *         description="ID du produit parent"
  *     ),
@@ -43,23 +44,42 @@ use Illuminate\Database\Eloquent\Model;
  *         description="Quantité en stock"
  *     ),
  *     @OA\Property(
- *         property="attributes",
- *         type="object",
- *         description="Attributs de la variante (couleur, taille, etc.)"
+ *         property="color",
+ *         type="string",
+ *         description="Couleur"
  *     ),
  *     @OA\Property(
- *         property="product",
- *         ref="#/components/schemas/Product",
- *         description="Produit parent"
+ *         property="attributes",
+ *         type="object",
+ *         description="Attributs de la variante"
+ *     ),
+ *     @OA\Property(
+ *         property="image",
+ *         type="string",
+ *         description="Image de la variante"
+ *     ),
+ *     @OA\Property(
+ *         property="created_at",
+ *         type="string",
+ *         format="date-time"
+ *     ),
+ *     @OA\Property(
+ *         property="updated_at",
+ *         type="string",
+ *         format="date-time"
  *     ),
  *     example={
  *         "id": 1,
- *         "product_id": 5,
+ *         "productId": 5,
  *         "name": "T-Shirt Rouge - L",
  *         "sku": "TSH-RED-L",
  *         "price": 29.99,
  *         "stock": 50,
- *         "attributes": {"color": "red", "size": "L"}
+ *         "color": "red",
+ *         "attributes": {"color": "red", "size": "L"},
+ *         "image": "tshirt-red-l.jpg",
+ *         "created_at": "2024-01-15T10:30:00Z",
+ *         "updated_at": "2024-01-15T10:35:00Z"
  *     }
  * )
  */
@@ -68,12 +88,14 @@ class ProductVariant extends Model
     use HasFactory;
 
     protected $fillable = [
-        'product_id',
+        'productId',
         'name',
         'sku',
         'price',
         'stock',
-        'attributes'
+        'color',
+        'attributes',
+        'image'
     ];
 
     protected $casts = [
@@ -81,12 +103,18 @@ class ProductVariant extends Model
         'price' => 'decimal:2'
     ];
 
+    protected $attributes = [
+        'color' => '',
+        'attributes' => null,
+        'image' => null
+    ];
+
     /**
      * Get the product that owns the variant.
      */
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'productId');
     }
 
     /**

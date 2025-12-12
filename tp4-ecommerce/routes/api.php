@@ -8,9 +8,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CartItemController;
+use App\Http\Controllers\ProductVariantController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DeliveryController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +70,24 @@ Route::prefix("cartItems")->group(function(){
      Route::delete("/{cartItemId}",[CartItemController::class,"deleteCartItem"]);
 
 });
+
+
+// ========== PRODUCT VARIANTS ROUTES ==========
+Route::prefix('products/{product}/variants')->group(function () {
+    Route::get('/', [ProductVariantController::class, 'index']); // GET /api/products/{id}/variants
+    Route::post('/', [ProductVariantController::class, 'store'])
+        ->middleware(['auth:sanctum', 'admin_or_vendor']); // POST /api/products/{id}/variants
+});
+
+Route::prefix('variants')->group(function () {
+    Route::get('/{variant}', [ProductVariantController::class, 'show']); // GET /api/variants/{id}
+    Route::put('/{variant}', [ProductVariantController::class, 'update'])
+        ->middleware(['auth:sanctum', 'admin_or_vendor']); // PUT /api/variants/{id}
+    Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])
+        ->middleware(['auth:sanctum', 'admin_or_vendor']); // DELETE /api/variants/{id}
+    Route::get('/search/by-sku/{sku}', [ProductVariantController::class, 'searchBySku']); // GET /api/variants/search/by-sku/{sku}
+});
+
 
 // --- NOUVELLES API LOGISTIQUE ---
 

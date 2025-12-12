@@ -135,89 +135,87 @@ class CartController extends Controller
      * )
      */
     public function addItem(Request $request)
-    {
-        try {
-            $request->validate([
-                'product_variant_id' => 'required|integer|exists:product_variants,id',
-                'quantity' => 'required|integer|min:1'
-            ]);
+{
+    try {
+        // CORRECTION : valider sur product_variants
+        $validated = $request->validate([
+            'product_variant_id' => 'required|integer|exists:product_variants,id', // ✅
+            'quantity' => 'required|integer|min:1'
+        ]);
+        
+        // CORRECTION : chercher ProductVariant, pas Product
+        $productVariant = \App\Models\ProductVariant::findOrFail($validated['product_variant_id']); // ✅
+        
+        // Vérifier le stock de la variante
+        if ($productVariant->stock < $validated['quantity']) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Stock insuffisant. Disponible: ' . $productVariant->stock,
+                'code' => 422
+            ], 422);
+        }
+        
+        DB::beginTransaction();
+        
+        $cart = $this->getOrCreateCart($request);
+        
+        $existingItem = $cart->items()
+            ->where('product_variant_id', $validated['product_variant_id'])
+            ->first();
+        
+        if ($existingItem) {
+            $newQuantity = $existingItem->quantity + $validated['quantity'];
             
-            $productVariant = ProductVariant::findOrFail($request->product_variant_id);
-            
-            // Vérifier le stock
-            if ($productVariant->stock < $request->quantity) {
+            if ($productVariant->stock < $newQuantity) {
+                DB::rollBack();
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Stock insuffisant. Disponible: ' . $productVariant->stock,
+                    'message' => 'Stock insuffisant pour la quantité demandée',
                     'code' => 422
                 ], 422);
             }
             
-            DB::beginTransaction();
-            
-            $cart = $this->getOrCreateCart($request);
-            
-            // Vérifier si l'article existe déjà dans le panier
-            $existingItem = $cart->items()
-                ->where('product_variant_id', $request->product_variant_id)
-                ->first();
-            
-            if ($existingItem) {
-                // Mettre à jour la quantité si l'article existe déjà
-                $newQuantity = $existingItem->quantity + $request->quantity;
-                
-                if ($productVariant->stock < $newQuantity) {
-                    DB::rollBack();
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Stock insuffisant pour la quantité demandée',
-                        'code' => 422
-                    ], 422);
-                }
-                
-                $existingItem->update([
-                    'quantity' => $newQuantity,
-                    'total' => $productVariant->price * $newQuantity
-                ]);
-            } else {
-                // Ajouter un nouvel article
-                CartItem::create([
-                    'cart_id' => $cart->id,
-                    'product_variant_id' => $request->product_variant_id,
-                    'quantity' => $request->quantity,
-                    'unit_price' => $productVariant->price,
-                    'total' => $productVariant->price * $request->quantity
-                ]);
-            }
-            
-            $this->updateCartTotals($cart);
-            DB::commit();
-            
-            $cart->load(['items.productVariant.product', 'items.productVariant.images']);
-            
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Article ajouté au panier',
-                'data' => $cart,
-                'code' => 200
-            ], 200);
-            
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Erreur de validation',
-                'errors' => $e->errors(),
-                'code' => 422
-            ], 422);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Erreur serveur: ' . $e->getMessage(),
-                'code' => 500
-            ], 500);
+            $existingItem->update([
+                'quantity' => $newQuantity
+            ]);
+        } else {
+            CartItem::create([
+                'cart_id' => $cart->id,
+                'product_variant_id' => $validated['product_variant_id'],
+                'quantity' => $validated['quantity'],
+                'unit_price' => $productVariant->price
+            ]);
         }
+        
+        $this->updateCartTotals($cart);
+        DB::commit();
+        
+        $cart->load(['items.productVariant.product']); // ✅
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Article ajouté au panier',
+            'data' => $cart,
+            'code' => 200
+        ], 200);
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Erreur de validation',
+            'errors' => $e->errors(),
+            'code' => 422
+        ], 422);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Erreur serveur: ' . $e->getMessage(),
+            'code' => 500
+        ], 500);
     }
+}
+
 
     /**
      * @OA\Put(
@@ -263,62 +261,53 @@ class CartController extends Controller
      * )
      */
     public function updateItem(Request $request, CartItem $cartItem)
-    {
-        try {
-            $request->validate([
-                'quantity' => 'required|integer|min:1'
-            ]);
-            
-            // Vérifier que l'article appartient à l'utilisateur
-            $cart = $this->getOrCreateCart($request);
-            if ($cartItem->cart_id !== $cart->id) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Article non trouvé dans votre panier',
-                    'code' => 404
-                ], 404);
-            }
-            
-            // Vérifier le stock
-            $productVariant = $cartItem->productVariant;
-            if ($request->quantity > $productVariant->stock) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Stock insuffisant. Disponible: ' . $productVariant->stock,
-                    'code' => 422
-                ], 422);
-            }
-            
-            $cartItem->update([
-                'quantity' => $request->quantity,
-                'total' => $cartItem->unit_price * $request->quantity
-            ]);
-            
-            $this->updateCartTotals($cart);
-            $cart->load(['items.productVariant.product', 'items.productVariant.images']);
-            
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Quantité mise à jour',
-                'data' => $cart,
-                'code' => 200
-            ], 200);
-            
-        } catch (\Illuminate\Validation\ValidationException $e) {
+{
+    try {
+        $request->validate([
+            'quantity' => 'required|integer|min:1'
+        ]);
+        
+        $cart = $this->getOrCreateCart($request);
+        if ($cartItem->cart_id !== $cart->id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Erreur de validation',
-                'errors' => $e->errors(),
+                'message' => 'Article non trouvé dans votre panier',
+                'code' => 404
+            ], 404);
+        }
+        
+        // CORRECTION : utiliser productVariant
+        $productVariant = $cartItem->productVariant; // ✅
+        if ($request->quantity > $productVariant->stock) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Stock insuffisant. Disponible: ' . $productVariant->stock,
                 'code' => 422
             ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Erreur serveur: ' . $e->getMessage(),
-                'code' => 500
-            ], 500);
         }
+        
+        $cartItem->update([
+            'quantity' => $request->quantity
+        ]);
+        
+        $this->updateCartTotals($cart);
+        $cart->load(['items.productVariant.product']); // ✅ Correction
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Quantité mise à jour',
+            'data' => $cart,
+            'code' => 200
+        ], 200);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Erreur serveur: ' . $e->getMessage(),
+            'code' => 500
+        ], 500);
     }
+}
 
     /**
      * @OA\Delete(
@@ -356,39 +345,38 @@ class CartController extends Controller
      *     )
      * )
      */
-    public function removeItem(Request $request, CartItem $cartItem)
-    {
-        try {
-            // Vérifier que l'article appartient à l'utilisateur
-            $cart = $this->getOrCreateCart($request);
-            if ($cartItem->cart_id !== $cart->id) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Article non trouvé dans votre panier',
-                    'code' => 404
-                ], 404);
-            }
-            
-            $cartItem->delete();
-            $this->updateCartTotals($cart);
-            $cart->load(['items.productVariant.product', 'items.productVariant.images']);
-            
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Article retiré du panier',
-                'data' => $cart,
-                'code' => 200
-            ], 200);
-            
-        } catch (\Exception $e) {
+    
+public function removeItem(Request $request, CartItem $cartItem)
+{
+    try {
+        $cart = $this->getOrCreateCart($request);
+        if ($cartItem->cart_id !== $cart->id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Erreur serveur: ' . $e->getMessage(),
-                'code' => 500
-            ], 500);
+                'message' => 'Article non trouvé dans votre panier',
+                'code' => 404
+            ], 404);
         }
+        
+        $cartItem->delete();
+        $this->updateCartTotals($cart);
+        $cart->load(['items.productVariant.product', 'items.productVariant.images']); // ✅ Correction
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Article retiré du panier',
+            'data' => $cart,
+            'code' => 200
+        ], 200);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Erreur serveur: ' . $e->getMessage(),
+            'code' => 500
+        ], 500);
     }
-
+}
     /**
      * @OA\Delete(
      *     path="/api/cart/clear",
@@ -408,30 +396,30 @@ class CartController extends Controller
      *     )
      * )
      */
-    public function clear(Request $request)
-    {
-        try {
-            $cart = $this->getOrCreateCart($request);
-            $cart->items()->delete();
-            $this->updateCartTotals($cart);
-            
-            $cart->load(['items.productVariant.product', 'items.productVariant.images']);
-            
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Panier vidé avec succès',
-                'data' => $cart,
-                'code' => 200
-            ], 200);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Erreur serveur: ' . $e->getMessage(),
-                'code' => 500
-            ], 500);
-        }
+   public function clear(Request $request)
+{
+    try {
+        $cart = $this->getOrCreateCart($request);
+        $cart->items()->delete();
+        $this->updateCartTotals($cart);
+        
+        $cart->load(['items.productVariant.product', 'items.productVariant.images']); // ✅ Correction
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Panier vidé avec succès',
+            'data' => $cart,
+            'code' => 200
+        ], 200);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Erreur serveur: ' . $e->getMessage(),
+            'code' => 500
+        ], 500);
     }
+}
 
     /**
      * @OA\Post(
@@ -452,27 +440,28 @@ class CartController extends Controller
      *     )
      * )
      */
-    public function store(Request $request)
-    {
-        try {
-            $cart = $this->getOrCreateCart($request);
-            $cart->load(['items.productVariant.product', 'items.productVariant.images']);
-            
-            return response()->json([
-                'status' => 'success',
-                'data' => $cart,
-                'message' => 'Panier récupéré',
-                'code' => 200
-            ], 200);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Erreur serveur: ' . $e->getMessage(),
-                'code' => 500
-            ], 500);
-        }
+    
+public function store(Request $request)
+{
+    try {
+        $cart = $this->getOrCreateCart($request);
+        $cart->load(['items.productVariant.product', 'items.productVariant.images']); // ✅ Correction
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => $cart,
+            'message' => 'Panier récupéré',
+            'code' => 200
+        ], 200);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Erreur serveur: ' . $e->getMessage(),
+            'code' => 500
+        ], 500);
     }
+}
 
     /**
      * @OA\Delete(
@@ -586,16 +575,18 @@ class CartController extends Controller
     /**
      * Update cart totals (items count and total price)
      */
-    private function updateCartTotals(Cart $cart)
-{
-    // Recharger les items avec la somme
-    $items = $cart->items()->get();
-    
-    $cart->update([
-        'items_count' => $items->sum('quantity'),
-        'total' => $items->sum(function($item) {
+   private function updateCartTotals(Cart $cart)
+    {
+        $items = $cart->items()->get();
+        
+        // Calculer le total en multipliant unit_price * quantity
+        $total = $items->sum(function($item) {
             return ($item->unit_price ?? 0) * ($item->quantity ?? 0);
-        })
-    ]);
-}
+        });
+        
+        $cart->update([
+            'items_count' => $items->sum('quantity'),
+            'total' => $total
+        ]);
+    }
 }

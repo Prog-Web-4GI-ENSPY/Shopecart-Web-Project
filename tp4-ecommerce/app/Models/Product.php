@@ -59,7 +59,13 @@ class Product extends Model
 
 
 
-    
+      /**
+     * Get the variants for the product.
+     */
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
 
 
     // Relation avec Category

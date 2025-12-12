@@ -26,7 +26,7 @@ use Illuminate\Database\Eloquent\Model;
  *         property="product_variant_id",
  *         type="integer",
  *         format="int64",
- *         description="ID de la variante du produit"
+ *         description="ID du produit (ou variante) - À CHANGER"
  *     ),
  *     @OA\Property(
  *         property="quantity",
@@ -57,11 +57,6 @@ use Illuminate\Database\Eloquent\Model;
  *         format="date-time",
  *         description="Date de mise à jour"
  *     ),
- *     @OA\Property(
- *         property="product_variant",
- *         ref="#/components/schemas/ProductVariant",
- *         description="Variante du produit"
- *     ),
  *     example={
  *         "id": 1,
  *         "cart_id": 5,
@@ -78,25 +73,21 @@ class CartItem extends Model
 {
     use HasFactory;
     
+    // TES COLONNES RÉELLES
     protected $fillable = [
         "quantity",
-        "cartId", // ou "cart_id" selon ta base de données
-        "productVariant_id", // ou "product_variant_id"
+        "cart_id",
+        "product_variant_id", // C'est product_variant_id, pas product_variant_id
         "unit_price",
         "total"
     ];
 
-    // Si tes colonnes ont des noms différents, utilise ces accesseurs
-    protected $appends = ['cart_id', 'product_variant_id'];
+    // Ajoute un attribut calculé pour total si nécessaire
+    protected $appends = ['total'];
 
-    public function getCartIdAttribute()
+    public function getTotalAttribute()
     {
-        return $this->attributes['cartId'] ?? null;
-    }
-
-    public function getProductVariantIdAttribute()
-    {
-        return $this->attributes['productVariantId'] ?? null;
+        return $this->unit_price * $this->quantity;
     }
 
     /**
@@ -104,15 +95,16 @@ class CartItem extends Model
      */
     public function cart()
     {
-        return $this->belongsTo(Cart::class, 'cart_id'); // 'cartId' est la clé étrangère
+        return $this->belongsTo(Cart::class, 'cart_id');
     }
 
     /**
-     * Get the product variant.
+     * Get the product VARIANT (pas le produit).
+     * Note: la colonne s'appelle product_variant_id mais devrait référencer product_variants
      */
     public function productVariant()
     {
-        return $this->belongsTo(ProductVariant::class, 'productVariant_id'); // 'productVariantId' est la clé étrangère
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
     /**
