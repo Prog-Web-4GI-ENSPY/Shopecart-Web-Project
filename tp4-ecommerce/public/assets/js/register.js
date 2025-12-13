@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
           
           // Redirection vers la page de connexion
           setTimeout(() => {
-            window.location.href = 'login.html';
+            window.location.href = 'login';
           }, 2000);
         }
         

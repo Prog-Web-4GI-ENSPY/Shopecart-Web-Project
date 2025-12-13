@@ -2850,7 +2850,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ProductsForProduct"
+                                                "$ref": "#/components/schemas/Product"
                                             }
                                         },
                                         "meta": {
@@ -2873,7 +2873,7 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "name",
@@ -2919,6 +2919,11 @@
                                     "is_featured": {
                                         "type": "boolean",
                                         "example": false
+                                    },
+                                    "image": {
+                                        "description": "Product image file (max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -2937,7 +2942,7 @@
                                             "type": "string",
                                             "example": "Product created successfully"
                                         },
-                                        "product": {
+                                        "data": {
                                             "$ref": "#/components/schemas/Product"
                                         }
                                     },
@@ -2957,13 +2962,57 @@
                 ]
             }
         },
-        "/api/products/{id}": {
-            "put": {
+        "/api/products/{slug}": {
+            "get": {
                 "tags": [
                     "Products"
                 ],
-                "summary": "Update product",
-                "operationId": "6a7e11900844cd85cff66e662b82bd4c",
+                "summary": "Get product details by slug (Public Access)",
+                "operationId": "2eb94cf22f00aa181040441a8ae7b07e",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Product slug (e.g., iphone-15-pro)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product retrieved successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Product"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found"
+                    }
+                }
+            }
+        },
+        "/api/products/{id}": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Update product (Use POST with _method=PUT for file upload)",
+                "operationId": "b4b789a4a3d0c47897f43991a5f12372",
                 "parameters": [
                     {
                         "name": "id",
@@ -2978,15 +3027,14 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
-                                "required": [
-                                    "name",
-                                    "price",
-                                    "stock",
-                                    "category_id"
-                                ],
                                 "properties": {
+                                    "_method": {
+                                        "description": "Required for method spoofing",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
                                     "name": {
                                         "type": "string",
                                         "example": "Updated Product Name"
@@ -3024,6 +3072,17 @@
                                     "is_featured": {
                                         "type": "boolean",
                                         "example": true
+                                    },
+                                    "image": {
+                                        "description": "New product image file",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "remove_image": {
+                                        "description": "Set to true to delete current image.",
+                                        "type": "boolean",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -3042,7 +3101,7 @@
                                             "type": "string",
                                             "example": "Product updated successfully"
                                         },
-                                        "product": {
+                                        "data": {
                                             "$ref": "#/components/schemas/Product"
                                         }
                                     },
@@ -3097,6 +3156,9 @@
                     },
                     "403": {
                         "description": "Access denied"
+                    },
+                    "404": {
+                        "description": "Product not found"
                     }
                 },
                 "security": [
@@ -3111,8 +3173,19 @@
                 "tags": [
                     "Products"
                 ],
-                "summary": "Get vendor's products (Minimal Pagination)",
+                "summary": "Get vendor's products (Minimal Pagination) - Visible to Admin/Vendor",
                 "operationId": "e1caf79623d4afd8e2e296f0c244e580",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of products per page.",
+                        "schema": {
+                            "type": "integer",
+                            "default": 12
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Vendor's products list",
@@ -3127,7 +3200,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ProductsForProduct"
+                                                "$ref": "#/components/schemas/Product"
                                             }
                                         },
                                         "total": {
@@ -3145,7 +3218,7 @@
                         }
                     },
                     "403": {
-                        "description": "Access denied. Vendor role required."
+                        "description": "Access denied. Vendor or Admin role required."
                     }
                 },
                 "security": [
@@ -3160,7 +3233,7 @@
                 "tags": [
                     "Products"
                 ],
-                "summary": "Get vendor statistics (Admin/Vendor)",
+                "summary": "Get product statistics (Admin/Vendor)",
                 "operationId": "8fc21d52bf9442ce22f18079d9c2056d",
                 "responses": {
                     "200": {
@@ -3209,6 +3282,58 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/products/featured": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get a list of featured products (Public Access)",
+                "operationId": "a6d77f78200bf3c67c5d5cbc7a93a0fa",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Maximum number of products to return.",
+                        "schema": {
+                            "type": "integer",
+                            "default": 8
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Featured products retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Product"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Featured products retrieved successfully"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/products/{product}/variants": {
@@ -3285,7 +3410,7 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "name",
@@ -3322,6 +3447,12 @@
                                             "color": "red",
                                             "size": "L"
                                         }
+                                    },
+                                    "image": {
+                                        "description": "Main variant image file",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -3419,12 +3550,12 @@
                     }
                 }
             },
-            "put": {
+            "post": {
                 "tags": [
                     "Product Variants"
                 ],
-                "summary": "Update a product variant",
-                "operationId": "f9cf7229da6ae190281e7895f9736285",
+                "summary": "Update a product variant (Use POST with _method=PUT for file upload)",
+                "operationId": "735c2eb5c85502c053731274f321a6ce",
                 "parameters": [
                     {
                         "name": "variant",
@@ -3439,9 +3570,14 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "properties": {
+                                    "_method": {
+                                        "description": "Required for method spoofing with multipart/form-data",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
                                     "name": {
                                         "type": "string",
                                         "example": "T-Shirt Rouge - L"
@@ -3469,6 +3605,18 @@
                                             "color": "red",
                                             "size": "L"
                                         }
+                                    },
+                                    "image": {
+                                        "description": "New variant image file",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "remove_image": {
+                                        "description": "Set to true to delete current image.",
+                                        "type": "boolean",
+                                        "example": false,
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -4067,225 +4215,6 @@
     },
     "components": {
         "schemas": {
-            "ProductsForProduct": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "iPhone 15 Pro"
-                    },
-                    "slug": {
-                        "type": "string",
-                        "example": "iphone-15-pro"
-                    },
-                    "description": {
-                        "type": "string",
-                        "example": "Latest iPhone with advanced features"
-                    },
-                    "price": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 999.99
-                    },
-                    "compare_price": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 1099.99
-                    },
-                    "stock": {
-                        "type": "integer",
-                        "example": 50
-                    },
-                    "sku": {
-                        "type": "string",
-                        "example": "IP15PRO256"
-                    },
-                    "is_visible": {
-                        "type": "boolean",
-                        "example": true
-                    },
-                    "is_featured": {
-                        "type": "boolean",
-                        "example": true
-                    },
-                    "image": {
-                        "type": "string",
-                        "example": "products/iphone15.jpg"
-                    },
-                    "category_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "type": "object"
-            },
-            "CategoryForProduct": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "Electronics"
-                    },
-                    "slug": {
-                        "type": "string",
-                        "example": "electronics"
-                    },
-                    "description": {
-                        "type": "string",
-                        "example": "Electronic devices and accessories"
-                    },
-                    "is_visible": {
-                        "type": "boolean",
-                        "example": true
-                    },
-                    "position": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "type": "object"
-            },
-            "CartForProduct": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "total": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 199.98
-                    },
-                    "items_count": {
-                        "type": "integer",
-                        "example": 2
-                    },
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/CartItem"
-                        }
-                    }
-                },
-                "type": "object"
-            },
-            "CartItemForProduct": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "quantity": {
-                        "type": "integer",
-                        "example": 2
-                    },
-                    "unit_price": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 99.99
-                    },
-                    "total": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 199.98
-                    },
-                    "product": {
-                        "$ref": "#/components/schemas/Product"
-                    }
-                },
-                "type": "object"
-            },
-            "OrderForProduct": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "order_number": {
-                        "type": "string",
-                        "example": "ORD-20231215-ABC123"
-                    },
-                    "status": {
-                        "type": "string",
-                        "example": "pending"
-                    },
-                    "subtotal": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 199.98
-                    },
-                    "shipping": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 10
-                    },
-                    "tax": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 20
-                    },
-                    "total": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 229.98
-                    },
-                    "customer_email": {
-                        "type": "string",
-                        "example": "john@example.com"
-                    },
-                    "customer_first_name": {
-                        "type": "string",
-                        "example": "John"
-                    },
-                    "customer_last_name": {
-                        "type": "string",
-                        "example": "Doe"
-                    },
-                    "shipping_address": {
-                        "type": "string",
-                        "example": "123 Main St"
-                    },
-                    "shipping_city": {
-                        "type": "string",
-                        "example": "New York"
-                    },
-                    "shipping_zipcode": {
-                        "type": "string",
-                        "example": "10001"
-                    },
-                    "shipping_country": {
-                        "type": "string",
-                        "example": "USA"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "type": "object"
-            },
             "Cart": {
                 "title": "Cart",
                 "description": "Modèle de données pour un panier d'achat.",
@@ -5131,6 +5060,14 @@
             "description": "API Endpoints for Orders"
         },
         {
+            "name": "Products",
+            "description": "API Endpoints for Products"
+        },
+        {
+            "name": "Product Variants",
+            "description": "Gestion des variantes (tailles, couleurs, etc.) d'un produit."
+        },
+        {
             "name": "Users",
             "description": "API Endpoints for User Management (Admin/Manager/Supervisor)"
         },
@@ -5141,14 +5078,6 @@
         {
             "name": "Payments",
             "description": "Payments"
-        },
-        {
-            "name": "Products",
-            "description": "Products"
-        },
-        {
-            "name": "Product Variants",
-            "description": "Product Variants"
         }
     ]
 }

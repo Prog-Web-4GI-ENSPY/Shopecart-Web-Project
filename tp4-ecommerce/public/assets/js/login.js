@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
           
           // Redirection après un court délai
           setTimeout(() => {
-            window.location.href = 'about.html';
+           window.location.href = 'home';
           }, 1500);
         }
         
@@ -157,3 +157,4 @@ document.addEventListener('DOMContentLoaded', () => {
     return colors[type] || '#2196F3';
   }
 });
+
