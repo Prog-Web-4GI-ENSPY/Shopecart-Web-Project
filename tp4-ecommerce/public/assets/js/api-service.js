@@ -352,21 +352,3 @@ async function loadFeaturedProducts() {
 }
 
 loadFeaturedProducts();
-
-// Récupérer un seul produit par ID
-async function loadProductDetails(productId) {
-    try {
-        // La méthode getProduct(id) appelle this.request(`/products/${id}`)
-        const response = await window.apiService.getProduct(productId);
-        
-        if (response.status === 'success') {
-            const product = response.data;
-            console.log(`Détails du produit ${productId}:`, product);
-        }
-
-    } catch (error) {
-        console.error(`Erreur lors de la récupération du produit ${productId}:`, error);
-    }
-}
-
-loadProductDetails(2);
