@@ -25,7 +25,7 @@
                     "Dashboard & Reports"
                 ],
                 "summary": "Get main Key Performance Indicators (KPIs)",
-                "operationId": "e3ffaa45376734cb46f87e051250b1f5",
+                "operationId": "getKpis",
                 "responses": {
                     "200": {
                         "description": "KPIs retrieved successfully",
@@ -110,7 +110,7 @@
                     "Dashboard & Reports"
                 ],
                 "summary": "Get sales volume and revenue trend over a period (e.g., last 30 days)",
-                "operationId": "be25a5f67ebff827e0969f2cd3450be7",
+                "operationId": "getSalesOverTime",
                 "parameters": [
                     {
                         "name": "period",
@@ -187,7 +187,7 @@
                     "Dashboard & Reports"
                 ],
                 "summary": "Get top selling products (quantity and revenue)",
-                "operationId": "451a834220d0866a8b323f4adc395400",
+                "operationId": "getTopProducts",
                 "parameters": [
                     {
                         "name": "limit",
@@ -246,7 +246,7 @@
                     "Dashboard & Reports"
                 ],
                 "summary": "Get the count of orders by status for pie charts",
-                "operationId": "b4de423c6cecc86e5a1abb2e8a3e181a",
+                "operationId": "getOrderStatusDistribution",
                 "responses": {
                     "200": {
                         "description": "Status distribution retrieved successfully",
@@ -290,7 +290,7 @@
                     "Deliveries"
                 ],
                 "summary": "Get orders ready to be assigned to a delivery person (Management Roles only)",
-                "operationId": "94199be3212b130cf9cb314360583576",
+                "operationId": "getPendingDeliveries",
                 "responses": {
                     "200": {
                         "description": "List of pending orders"
@@ -312,7 +312,7 @@
                     "Deliveries"
                 ],
                 "summary": "Assign an order to a delivery person (Management Roles only)",
-                "operationId": "df5e30aeac209b67af78b8f64cb4ef93",
+                "operationId": "assignDelivery",
                 "parameters": [
                     {
                         "name": "order",
@@ -365,7 +365,7 @@
                     "Deliveries"
                 ],
                 "summary": "Get deliveries assigned to the authenticated user (Delivery Role only)",
-                "operationId": "7588b1710b79e368dde26652d27376ea",
+                "operationId": "getMyDeliveries",
                 "responses": {
                     "200": {
                         "description": "List of deliveries"
@@ -387,7 +387,7 @@
                     "Deliveries"
                 ],
                 "summary": "Affiche l'historique des livraisons terminées (Livré, Échec) pour le livreur connecté (Delivery Role only).",
-                "operationId": "a8e060acca5eb87a6660c2247f1178b9",
+                "operationId": "getDeliveryHistory",
                 "responses": {
                     "200": {
                         "description": "Liste des commandes terminées."
@@ -409,7 +409,7 @@
                     "Deliveries"
                 ],
                 "summary": "Update the delivery status of an order (Assigned Delivery Role only)",
-                "operationId": "87ac72b6646f9cb07d9c89fc4e5bf8a1",
+                "operationId": "updateStatus",
                 "parameters": [
                     {
                         "name": "order",
@@ -465,7 +465,7 @@
                     "Deliveries"
                 ],
                 "summary": "Update the authenticated delivery person's current GPS location (Delivery Role only)",
-                "operationId": "a9311624e529b78b043ffdf1fb70b7db",
+                "operationId": "updateLocation",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -509,7 +509,7 @@
                     "Deliveries"
                 ],
                 "summary": "Get all active delivery persons' live locations for the admin map (Management Roles only)",
-                "operationId": "05aba8c7cb27856320d7387bcc142ff0",
+                "operationId": "getLiveLocations",
                 "responses": {
                     "200": {
                         "description": "List of live locations"
@@ -531,7 +531,7 @@
                     "Deliveries"
                 ],
                 "summary": "Get the delivery proof path (Admin/Manager/Supervisor/Client/Assigned Delivery)",
-                "operationId": "3254bff3bc4b0ebb03d6949e5f5d7a93",
+                "operationId": "getProof",
                 "parameters": [
                     {
                         "name": "order",
@@ -564,7 +564,7 @@
                     "Deliveries"
                 ],
                 "summary": "Uploads the proof of delivery (image) for an order (Assigned Delivery Role only)",
-                "operationId": "d9e4a2930e06e32e86ffc071382d8694",
+                "operationId": "uploadProof",
                 "parameters": [
                     {
                         "name": "order",
@@ -933,7 +933,7 @@
                     "Cart"
                 ],
                 "summary": "Get user's cart",
-                "operationId": "3a8631f1ac30c83b5ad826df8fda966f",
+                "operationId": "show",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -1062,7 +1062,7 @@
                     "Cart"
                 ],
                 "summary": "Create or get cart",
-                "operationId": "b432c7bbb8b06ea2019c3d37f23258ca",
+                "operationId": "store",
                 "responses": {
                     "200": {
                         "description": "Cart retrieved or created",
@@ -1105,7 +1105,7 @@
                     "Cart"
                 ],
                 "summary": "Add item to cart",
-                "operationId": "c0e8ca78699ccc07858444da702d3ac5",
+                "operationId": "addItem",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1199,7 +1199,7 @@
                     "Cart"
                 ],
                 "summary": "Update cart item quantity",
-                "operationId": "4821dca79c7ed9c583c1598cb450fc5d",
+                "operationId": "updateItem",
                 "parameters": [
                     {
                         "name": "cartItem",
@@ -1294,7 +1294,7 @@
                     "Cart"
                 ],
                 "summary": "Remove item from cart",
-                "operationId": "8d114a15678817e115627d0eace73231",
+                "operationId": "removeItem",
                 "parameters": [
                     {
                         "name": "cartItem",
@@ -1372,7 +1372,7 @@
                     "Cart"
                 ],
                 "summary": "Clear the cart",
-                "operationId": "c2cf94402630acad1cc6d317ec806693",
+                "operationId": "clear",
                 "responses": {
                     "200": {
                         "description": "Cart cleared successfully",
@@ -1490,7 +1490,7 @@
                     "CartItem"
                 ],
                 "summary": "Get all cart items for a specific cart",
-                "operationId": "ca52ae915104f3d82d08b03c601cee47",
+                "operationId": "getCartItem",
                 "parameters": [
                     {
                         "name": "cartId",
@@ -1666,7 +1666,7 @@
                     "CartItem"
                 ],
                 "summary": "Get a single cart item by ID",
-                "operationId": "6656432577c7e26ffb9b88cf18ddcebc",
+                "operationId": "getCartItem",
                 "parameters": [
                     {
                         "name": "cartItemId",
@@ -1783,7 +1783,7 @@
                     "CartItem"
                 ],
                 "summary": "Update an existing cart item",
-                "operationId": "959220efcd68eb08d14cc121a69cddb1",
+                "operationId": "updateCartItem",
                 "parameters": [
                     {
                         "name": "cartItemId",
@@ -1895,7 +1895,7 @@
                     "CartItem"
                 ],
                 "summary": "Delete a cart item",
-                "operationId": "9282fe541984a1b64b350a44d643e678",
+                "operationId": "deleteCartItem",
                 "parameters": [
                     {
                         "name": "cartItemId",
@@ -1994,7 +1994,7 @@
                     "CartItem"
                 ],
                 "summary": "Add a new cart item",
-                "operationId": "dc9045ea47ded10c062f6c971ae2b4aa",
+                "operationId": "addCartItem",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2117,7 +2117,7 @@
                     "Categories"
                 ],
                 "summary": "Get all categories (Public)",
-                "operationId": "3f5817a34833d0a1f4af4548dd3aeaba",
+                "operationId": "index",
                 "parameters": [
                     {
                         "name": "per_page",
@@ -2158,7 +2158,7 @@
                     "Categories"
                 ],
                 "summary": "Create a new category (Admin only)",
-                "operationId": "71fcad552bb0eaba9fb191fd8d8dcab0",
+                "operationId": "show",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2211,7 +2211,7 @@
                     "Categories"
                 ],
                 "summary": "Get category details (Public)",
-                "operationId": "e92579e78391b6199e78c2a091dbea0a",
+                "operationId": "index",
                 "parameters": [
                     {
                         "name": "category",
@@ -2249,7 +2249,7 @@
                     "Categories"
                 ],
                 "summary": "Update category (using POST with _method=PUT for file support) (Admin only)",
-                "operationId": "683621a56362beb1f73f80cda349f999",
+                "operationId": "update",
                 "parameters": [
                     {
                         "name": "category",
@@ -2321,7 +2321,7 @@
                     "Categories"
                 ],
                 "summary": "Delete category (Admin only)",
-                "operationId": "d9ecd5c4a74c4d75339251863eedc08c",
+                "operationId": "destroy",
                 "parameters": [
                     {
                         "name": "category",
@@ -2443,7 +2443,7 @@
                     "Orders"
                 ],
                 "summary": "Get user's orders",
-                "operationId": "2cd7e03021e72d9d799c12dfe179c865",
+                "operationId": "index",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -2481,7 +2481,7 @@
                     "Orders"
                 ],
                 "summary": "Create a new order",
-                "operationId": "d690d6834318e9b064df441e854de8b9",
+                "operationId": "store",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2593,7 +2593,7 @@
                     "Orders"
                 ],
                 "summary": "Update the status of a specific order (Management Only)",
-                "operationId": "ca851ecbdeb079209abac2e00c4a6359",
+                "operationId": "updateStatus",
                 "parameters": [
                     {
                         "name": "order",
@@ -2674,7 +2674,7 @@
                     "Orders"
                 ],
                 "summary": "Get order details",
-                "operationId": "c29621029e70f65247909d3e09031118",
+                "operationId": "show",
                 "parameters": [
                     {
                         "name": "id",
@@ -2717,7 +2717,7 @@
                     "Orders"
                 ],
                 "summary": "Get list of orders for the authenticated user (Client Only)",
-                "operationId": "bbe2ec3088f531fcb7cb01b1b2c8fa89",
+                "operationId": "myOrders",
                 "parameters": [
                     {
                         "name": "status",
@@ -2767,7 +2767,7 @@
                     "Payments"
                 ],
                 "summary": "Create a Stripe PaymentIntent and local payment record",
-                "operationId": "e90c50d0903f6a87baf44a1212373499",
+                "operationId": "createPaymentIntentWithCardd",
                 "parameters": [
                     {
                         "name": "orderId",
@@ -2839,7 +2839,7 @@
                     "Payments"
                 ],
                 "summary": "Register the transaction id of a payment",
-                "operationId": "14c010e1a7b269b2e9ba9601989560da",
+                "operationId": "storePayment",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2896,7 +2896,7 @@
                     "Products"
                 ],
                 "summary": "Get a list of all visible products (Public Access)",
-                "operationId": "1bfaa78d1c2c3848ab8165c5dadcad3e",
+                "operationId": "index",
                 "parameters": [
                     {
                         "name": "search",
@@ -2957,7 +2957,7 @@
                     "Products"
                 ],
                 "summary": "Create a new product",
-                "operationId": "e8185e307706e2cd84bbcf5171e2f09d",
+                "operationId": "store",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -3056,7 +3056,7 @@
                     "Products"
                 ],
                 "summary": "Get product details by slug (Public Access)",
-                "operationId": "2eb94cf22f00aa181040441a8ae7b07e",
+                "operationId": "show",
                 "parameters": [
                     {
                         "name": "slug",
@@ -3100,7 +3100,7 @@
                     "Products"
                 ],
                 "summary": "Update product (Use POST with _method=PUT for file upload)",
-                "operationId": "b4b789a4a3d0c47897f43991a5f12372",
+                "operationId": "update",
                 "parameters": [
                     {
                         "name": "id",
@@ -3213,7 +3213,7 @@
                     "Products"
                 ],
                 "summary": "Delete product",
-                "operationId": "e80a6ca46716acee6b47ea1ac91663c0",
+                "operationId": "destroy",
                 "parameters": [
                     {
                         "name": "id",
@@ -3262,7 +3262,7 @@
                     "Products"
                 ],
                 "summary": "Get vendor's products (Minimal Pagination) - Visible to Admin/Vendor",
-                "operationId": "e1caf79623d4afd8e2e296f0c244e580",
+                "operationId": "myProducts",
                 "parameters": [
                     {
                         "name": "per_page",
@@ -3322,7 +3322,7 @@
                     "Products"
                 ],
                 "summary": "Get product statistics (Admin/Vendor)",
-                "operationId": "8fc21d52bf9442ce22f18079d9c2056d",
+                "operationId": "vendorStats",
                 "responses": {
                     "200": {
                         "description": "Vendor statistics",
@@ -3378,7 +3378,7 @@
                     "Products"
                 ],
                 "summary": "Get a list of featured products (Public Access)",
-                "operationId": "a6d77f78200bf3c67c5d5cbc7a93a0fa",
+                "operationId": "featured",
                 "parameters": [
                     {
                         "name": "limit",
@@ -3430,7 +3430,7 @@
                     "Product Variants"
                 ],
                 "summary": "Get all variants for a product",
-                "operationId": "e90de3bd67ba1bf646a47827c51d16f5",
+                "operationId": "index",
                 "parameters": [
                     {
                         "name": "product",
@@ -3483,7 +3483,7 @@
                     "Product Variants"
                 ],
                 "summary": "Create a new product variant",
-                "operationId": "051d0e4aa749f3cbbfbd48c99ed4c858",
+                "operationId": "store",
                 "parameters": [
                     {
                         "name": "product",
