@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\OrderResource;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use App\Mail\DeliveryAssignedNotification;
 
 /**
  * @OA\Tag(
@@ -102,6 +105,14 @@ class DeliveryController extends Controller
         ]);
 
         $deliveryUser = User::find($validated['delivery_user_id']);
+
+        if ($deliveryUser) {
+            try {
+                Mail::to($deliveryUser->email)->send(new DeliveryAssignedNotification($order, $deliveryUser));
+            } catch (\Exception $e) {
+                Log::error("Erreur d'envoi d'e-mail d'assignation au livreur ID {$deliveryUser->id}: " . $e->getMessage());
+            }
+        }   
 
         if (!$deliveryUser || !$deliveryUser->isDelivery()) {
             return response()->json(['message' => 'Invalid delivery user ID or role.'], 404);

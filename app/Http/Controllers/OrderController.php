@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\UpdateOrderStatusRequest;
+use Illuminate\Support\Facades\Mail; 
+use Illuminate\Support\Facades\Log;
+use App\Mail\OrderConfirmation; // Import du Mailable
 
 /**
  * @OA\Tag(
@@ -225,9 +228,21 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // --- 6. Réponse Client (Minimaliste) ---
+           // --- 6. Envoi de l'E-mail de Confirmation ---
             // Le chargement doit correspondre à la structure utilisée (items.productVariant/items.product)
             $order->load(['items.productVariant', 'items.product', 'deliveryUser']); 
+
+            try {
+                // Envoi de l'e-mail de confirmation au client
+                Mail::to($order->customer_email)->send(new OrderConfirmation($order));
+                
+                // Optionnel : Envoyer une notification aux administrateurs (nécessite le Mailable et les adresses admin)
+                // Mail::to('admin@shopcart.com')->send(new AdminNewOrderNotification($order));
+                
+            } catch (\Exception $e) {
+                // Log l'erreur sans stopper la réponse client
+                Log::error("Erreur d'envoi d'e-mail de confirmation de commande n°{$order->id}: " . $e->getMessage());
+            }
 
             return response()->json([
                 'message' => 'Order created successfully. Status: ' . $initialStatus,
@@ -287,11 +302,21 @@ class OrderController extends Controller
             $order->status = $newStatus;
             $order->save();
 
-            // Logique supplémentaire selon le statut (ex: envoyer un email)
-            // if ($newStatus === Order::STATUS_SHIPPED) { 
-            //     // Envoi de notification au client
-            // }
-
+            // ✅ NOUVELLE LOGIQUE D'ENVOI D'E-MAIL SELON LE STATUT
+            try {
+                // Créez un Mailable spécifique, ou utilisez un Mailable générique (ex: OrderStatusUpdated)
+                if ($newStatus === 'SHIPPED') { 
+                    // Exemple: Envoyer une notification d'expédition
+                    // Mail::to($order->customer_email)->send(new OrderShipped($order));
+                } elseif ($newStatus === 'DELIVERED') {
+                    // Exemple: Envoyer une notification de livraison terminée
+                    // Mail::to($order->customer_email)->send(new OrderDelivered($order));
+                }
+            } catch (\Exception $e) {
+                Log::error("Erreur d'envoi d'e-mail de statut pour la commande n°{$order->id}: " . $e->getMessage());
+            }
+            // FIN DE LA NOUVELLE LOGIQUE
+            
             DB::commit();
 
             return response()->json([

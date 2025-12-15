@@ -80,6 +80,12 @@ class AuthController extends Controller
             'address' => $request->address,
         ]);
 
+        try {
+            Mail::to($user->email)->send(new UserRegistered($user));
+        } catch (\Exception $e) {
+            Log::error("Erreur d'envoi d'e-mail d'inscription à {$user->email}: " . $e->getMessage());
+            // Continuer l'exécution même si l'e-mail échoue.
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -142,6 +148,13 @@ class AuthController extends Controller
             'address' => $request->address,
         ]);
 
+        // ✅ AJOUT DE L'ENVOI D'E-MAIL pour l'Admin
+        try {
+            // Vous pouvez réutiliser UserRegistered ou créer un AdminRegistered
+            Mail::to($user->email)->send(new UserRegistered($user, 'ADMIN')); 
+        } catch (\Exception $e) {
+            Log::error("Erreur d'envoi d'e-mail d'inscription Admin à {$user->email}: " . $e->getMessage());
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
