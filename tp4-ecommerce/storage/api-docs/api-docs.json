@@ -694,6 +694,90 @@
                 }
             }
         },
+        "/api/registerAdmin": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Enregistrement d'un  administrateur",
+                "operationId": "registerAdmin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": " Admin Principale"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@shopcart.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+237657450314",
+                                        "nullable": true
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Yaounde,Melen",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Enregistrement réussi. Retourne le jeton d'accès.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registered"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation des données."
+                    }
+                }
+            }
+        },
         "/api/login": {
             "post": {
                 "tags": [
@@ -3731,7 +3815,7 @@
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "CLIENT",
+                                "CUSTOMER",
                                 "ADMIN",
                                 "VENDOR",
                                 "DELIVERY",
@@ -3824,14 +3908,14 @@
                                     "role": {
                                         "type": "string",
                                         "enum": [
-                                            "CLIENT",
+                                            "CUSTOMER",
                                             "ADMIN",
                                             "VENDOR",
                                             "DELIVERY",
                                             "MANAGER",
                                             "SUPERVISOR"
                                         ],
-                                        "example": "CLIENT"
+                                        "example": "CUSTOMER"
                                     },
                                     "phone": {
                                         "type": "string",
@@ -4003,7 +4087,7 @@
                                     "role": {
                                         "type": "string",
                                         "enum": [
-                                            "CLIENT",
+                                            "CUSTOMER",
                                             "ADMIN",
                                             "VENDOR",
                                             "DELIVERY",

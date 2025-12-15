@@ -176,14 +176,19 @@ class CartController extends Controller
             }
             
             $existingItem->update([
-                'quantity' => $newQuantity
+                'quantity' => $newQuantity,
+                'total' => $newQuantity * $existingItem->unit_price 
             ]);
         } else {
+            // Calculer le total avant l'insertion
+            $total = $validated['quantity'] * $productVariant->price;
+
             CartItem::create([
                 'cart_id' => $cart->id,
                 'product_variant_id' => $validated['product_variant_id'],
                 'quantity' => $validated['quantity'],
-                'unit_price' => $productVariant->price
+                'unit_price' => $productVariant->price,
+                'total' => $total
             ]);
         }
         

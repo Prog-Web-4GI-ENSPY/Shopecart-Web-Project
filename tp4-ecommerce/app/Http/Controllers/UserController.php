@@ -53,7 +53,7 @@ class UserController extends Controller
      * in="query",
      * description="Filter by role",
      * required=false,
-     * @OA\Schema(type="string", enum={"CLIENT", "ADMIN", "VENDOR", "DELIVERY", "MANAGER", "SUPERVISOR"})
+     * @OA\Schema(type="string", enum={"CUSTOMER", "ADMIN", "VENDOR", "DELIVERY", "MANAGER", "SUPERVISOR"})
      * ),
      * @OA\Parameter(
      * name="per_page",
@@ -122,8 +122,8 @@ class UserController extends Controller
     * @OA\Property(
     * property="role",
     * type="string",
-    * enum={"CLIENT", "ADMIN", "VENDOR", "DELIVERY", "MANAGER", "SUPERVISOR"},
-    * example="CLIENT"
+    * enum={"CUSTOMER", "ADMIN", "VENDOR", "DELIVERY", "MANAGER", "SUPERVISOR"},
+    * example="CUSTOMER"
     * ),
     * @OA\Property(property="phone", type="string", example="+33612345678"),
     * @OA\Property(property="address", type="string", example="123 Rue de Paris")
@@ -263,7 +263,7 @@ class UserController extends Controller
 * @OA\Property(
 * property="role",
 * type="string",
-* enum={"CLIENT", "ADMIN", "VENDOR", "DELIVERY", "MANAGER", "SUPERVISOR"},
+* enum={"CUSTOMER", "ADMIN", "VENDOR", "DELIVERY", "MANAGER", "SUPERVISOR"},
 * example="ADMIN"
 * ),
 * @OA\Property(property="password", type="string", format="password", example="newpassword123"),

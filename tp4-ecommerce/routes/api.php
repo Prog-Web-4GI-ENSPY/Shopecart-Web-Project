@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\DashboardController;
 // --- AUTHENTIFICATION ---
 // Les routes d'enregistrement et de connexion doivent toujours être publiques
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/registerAdmin', [AuthController::class, 'registerAdmin']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // --- PRODUITS & CATÉGORIES (Lecture publique) ---
@@ -174,6 +175,8 @@ Route::middleware(['auth:sanctum', 'role:ADMIN,VENDOR'])->group(function () {
         Route::delete('/{variant}', [ProductVariantController::class, 'destroy']);
     });
 
+});
+
     // --- F. GESTION GRANULAIRE DES ARTICLES DE PANIER (CartItemController) ---
     // Ces routes peuvent être utilisées par les clients pour accéder à leurs propres articles/paniers.
     Route::prefix('cartItems')->controller(CartItemController::class)->group(function () {
@@ -195,5 +198,3 @@ Route::middleware(['auth:sanctum', 'role:ADMIN,VENDOR'])->group(function () {
         // DELETE /api/cartItems/{cartItemId}
         Route::delete('{cartItemId}', 'deleteCartItem');
     });
-});
-
