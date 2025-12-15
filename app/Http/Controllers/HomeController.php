@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Mail\ContactFormSubmitted; // Import du Mailable
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Mail; // Ajout de l'import Mail
+use Illuminate\Support\Facades\Log; // Ajout de l'import Log
 
 class HomeController extends Controller
 {
@@ -58,9 +60,21 @@ class HomeController extends Controller
             'message' => 'required|string|min:10',
         ]);
 
-        // Ici vous pouvez envoyer un email ou sauvegarder en base
-        // Pour l'instant, on retourne juste un message de succès
-
+        // ✅ LOGIQUE D'ENVOI D'EMAIL
+        $adminEmail = env('MAIL_CONTACT_RECEIVER', 'support@shopcart.com');
+        
+        try {
+            Mail::to($adminEmail)->send(new ContactFormSubmitted($validated));
+        } catch (\Exception $e) {
+            Log::error("Erreur d'envoi d'e-mail de contact à {$adminEmail}: " . $e->getMessage());
+            // Nous pourrions vouloir enregistrer le message dans la base de données même si l'e-mail échoue.
+            
+            // On peut optionnellement ajouter un message d'erreur moins visible pour le client
+            return redirect()->route('contact')
+                ->with('warning', "Votre message a été envoyé, mais nous avons rencontré un problème technique avec notre notification interne. Nous vous répondrons par e-mail.");
+        }
+        
+        // Retourne un message de succès
         return redirect()->route('contact')
             ->with('success', 'Votre message a été envoyé avec succès! Nous vous répondrons bientôt.');
     }
