@@ -90,6 +90,68 @@ class AuthController extends Controller
         ], 201);
     }
 
+     /**
+     * @OA\Post(
+     * path="/api/registerAdmin",
+     * operationId="registerAdmin",
+     * tags={"Auth"},
+     * summary="Enregistrement d'un  administrateur",
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"name", "email", "password", "password_confirmation"},
+     * @OA\Property(property="name", type="string", example=" Admin Principale"),
+     * @OA\Property(property="email", type="string", format="email", example="admin@shopcart.com"),
+     * @OA\Property(property="password", type="string", format="password", example="secret123"),
+     * @OA\Property(property="password_confirmation", type="string", format="password", example="secret123"),
+     * @OA\Property(property="phone", type="string", nullable=true, example="+237657450314"),
+     * @OA\Property(property="address", type="string", nullable=true, example="Yaounde,Melen") 
+     * )
+     * ),
+     * @OA\Response(
+     * response=201,
+     * description="Enregistrement réussi. Retourne le jeton d'accès.",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string", example="Registered"),
+     * @OA\Property(property="token", type="string", example="1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
+     * @OA\Property(property="user", type="object")
+     * )
+     * ),
+     * @OA\Response(
+     * response=422,
+     * description="Erreur de validation des données."
+     * )
+     * )
+     */
+    public function registerAdmin(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8|confirmed',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'ADMIN',
+            'phone' => $request->phone,
+            'address' => $request->address,
+        ]);
+
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Registered',
+            'token' => $token,
+            'user' => $user->only(['id', 'name', 'email', 'role', 'phone', 'address'])
+        ], 201);
+    }
+
     /**
      * @OA\Post(
      * path="/api/login", 

@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\DashboardController;
 // --- AUTHENTIFICATION ---
 // Les routes d'enregistrement et de connexion doivent toujours être publiques
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/registerAdmin', [AuthController::class, 'registerAdmin']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // --- PRODUITS & CATÉGORIES (Lecture publique) ---
