@@ -9,11 +9,10 @@ return [
                 'title' => 'Shopecart E-commerce API',
             ],
             
-            // ✅ AJOUTEZ CE BLOC SERVEURS ICI
             'servers' => [
                 [
                     // Cela lit APP_URL du .env (ou la valeur par défaut locale)
-                    'url' => env('APP_URL', 'http://127.0.0.1:8000') . '/api', 
+                    'url' => env('APP_URL', 'https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud') . '/api', 
                     // Pour votre environnement de production sur Laravel Cloud : 
                     // url sera: https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud/api
                     'description' => 'Current API Server (' . env('APP_ENV') . ')',
