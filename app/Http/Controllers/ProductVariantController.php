@@ -183,7 +183,7 @@ class ProductVariantController extends Controller
                 ],
                 'price' => 'required|numeric|min:0',
                 'stock' => 'required|integer|min:0',
-                'color' => 'required|string|max:50',
+                'color' => 'nullable|string|max:50',
                 'attributes' => 'nullable|array',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
             ]);
