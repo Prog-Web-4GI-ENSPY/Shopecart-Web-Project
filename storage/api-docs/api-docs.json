@@ -4,7 +4,7 @@
         "title": "Shopecart E-commerce API Documentation",
         "description": "Documentation des points d'accès (endpoints) de l'API Shopecart.",
         "contact": {
-            "email": "contact@shopecart.com"
+            "email": "azangueleonel9@gmail.com"
         },
         "version": "1.0.0"
     },
@@ -12,6 +12,10 @@
         {
             "url": "http://localhost:8000",
             "description": "Serveur de l'API locale"
+        },
+          {
+            "url": "https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud",
+            "description": "Serveur de l'API de Production"
         }
     ],
     "paths": {
