@@ -1,28 +1,234 @@
-
+<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Headphones Max - Détails | SonicWave</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('assets/css/header.css') }}" >
-    <link rel="stylesheet" href="{{ asset('assets/css/products_casque.css') }}">
-    <script defer src="{{ asset('assets/js/newsletter.js') }}"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ $product->name ?? 'Headphones Max' }} - Détails | SonicWave</title>
     
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/css/header.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/products_casque.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/footer.css') }}">
-    <script src="{{ asset('assets/js/product_navigation_casques.js') }}" defer></script> 
-    <script src="{{ asset('assets/js/product_pagination.js') }}" defer></script> 
-    <script defer src="{{ asset('assets/js/newsletter.js') }}"></script>
+    
+    <!-- Scripts -->
+    <script src="{{ asset('assets/js/api-service.js') }}" defer></script>
+    <script src="{{ asset('assets/js/universal-product-loader.js') }}" defer></script>
     <script src="{{ asset('assets/js/cart-manager.js') }}" defer></script>
+    
+    <!-- Script d'initialisation pour la page détail -->
+    <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('🚀 Initialisation de la page détail...');
+        
+        // Attendre que l'API soit prête
+        await new Promise(resolve => {
+            const checkApi = setInterval(() => {
+                if (window.apiService) {
+                    clearInterval(checkApi);
+                    resolve();
+                }
+            }, 100);
+        });
+        
+        // Configuration des grilles pour les recommandations
+        const gridConfig = {
+            bestSellers: '#best-sellers-grid',
+            forYou: '#products-for-you-grid'
+        };
+        
+        // Essayer différentes catégories pour les recommandations
+        const categoryNames = ['Électronique', 'Casques audio', 'Audio'];
+        
+        let loaded = false;
+        
+        for (const categoryName of categoryNames) {
+            if (loaded) break;
+            
+            try {
+                console.log(`🔄 Chargement des recommandations avec: "${categoryName}"`);
+                
+                // Vérifier si cette catégorie existe
+                const category = await window.apiService.findCategoryByName(categoryName);
+                
+                if (category && window.productLoader) {
+                    // Initialiser le chargeur pour les recommandations
+                    await window.productLoader.init(category.name, gridConfig, {
+                        productsPerPage: 8
+                    });
+                    
+                    loaded = true;
+                    console.log(`✅ Recommandations chargées avec "${category.name}"`);
+                    break;
+                }
+                
+            } catch (error) {
+                console.warn(`⚠️ Erreur avec "${categoryName}":`, error.message);
+                continue;
+            }
+        }
+        
+        // Initialiser les interactions de la page détail
+        initProductDetail();
+        
+        // Initialiser la pagination après chargement
+        setTimeout(() => {
+            if (typeof initPagination === 'function') {
+                initPagination();
+            }
+        }, 1500);
+    });
+    
+    // Fonction pour initialiser les interactions de la page détail
+    function initProductDetail() {
+        console.log('🎨 Initialisation des interactions produit...');
+        
+        // 1. Changement d'image au clic sur les miniatures
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const mainImage = document.getElementById('main-image');
+        
+        if (thumbnails.length > 0 && mainImage) {
+            thumbnails.forEach(thumb => {
+                thumb.addEventListener('click', function() {
+                    // Retirer la classe active de toutes les miniatures
+                    thumbnails.forEach(t => t.classList.remove('active'));
+                    
+                    // Ajouter la classe active à la miniature cliquée
+                    this.classList.add('active');
+                    
+                    // Changer l'image principale
+                    const img = this.querySelector('img');
+                    if (img && img.dataset.image) {
+                        mainImage.src = img.dataset.image;
+                    }
+                });
+            });
+        }
+        
+        // 2. Sélection de couleur
+        const colorOptions = document.querySelectorAll('.color-option');
+        const selectedColorText = document.getElementById('selected-color');
+        
+        if (colorOptions.length > 0) {
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Retirer la classe active de toutes les options
+                    colorOptions.forEach(o => o.classList.remove('active'));
+                    
+                    // Ajouter la classe active à l'option cliquée
+                    this.classList.add('active');
+                    
+                    // Mettre à jour le texte de la couleur sélectionnée
+                    if (selectedColorText) {
+                        const color = this.getAttribute('data-color') || 'Couleur';
+                        selectedColorText.textContent = color;
+                    }
+                });
+            });
+        }
+        
+        // 3. Contrôle de quantité
+        const minusBtn = document.querySelector('.quantity-btn:first-child');
+        const plusBtn = document.querySelector('.quantity-btn:last-child');
+        const quantityDisplay = document.querySelector('.quantity-display');
+        
+        if (minusBtn && plusBtn && quantityDisplay) {
+            let quantity = parseInt(quantityDisplay.textContent) || 1;
+            
+            minusBtn.addEventListener('click', function() {
+                if (quantity > 1) {
+                    quantity--;
+                    quantityDisplay.textContent = quantity;
+                }
+            });
+            
+            plusBtn.addEventListener('click', function() {
+                quantity++;
+                quantityDisplay.textContent = quantity;
+            });
+        }
+        
+        // 4. Boutons d'action
+        const buyBtn = document.querySelector('.btn-buy');
+        const addBtn = document.querySelector('.btn-add');
+        
+        if (buyBtn) {
+            buyBtn.addEventListener('click', function() {
+                const quantity = parseInt(document.querySelector('.quantity-display').textContent) || 1;
+                alert(`Fonctionnalité "Acheter maintenant" - Quantité: ${quantity}`);
+                // Ici vous pouvez rediriger vers la page de paiement
+            });
+        }
+        
+        if (addBtn) {
+            addBtn.addEventListener('click', async function() {
+                const quantity = parseInt(document.querySelector('.quantity-display').textContent) || 1;
+                
+                // Récupérer l'ID du produit depuis l'URL ou un data-attribute
+                const productId = getProductIdFromPage();
+                
+                if (productId && window.apiService) {
+                    try {
+                        await window.apiService.addToCart(productId, quantity);
+                        
+                        // Afficher une notification
+                        if (window.productLoader) {
+                            window.productLoader.showNotification('Produit ajouté au panier', 'success');
+                        } else {
+                            alert('Produit ajouté au panier !');
+                        }
+                        
+                    } catch (error) {
+                        const message = window.productLoader 
+                            ? `Erreur: ${error.message}`
+                            : 'Erreur lors de l\'ajout au panier';
+                        
+                        if (window.productLoader) {
+                            window.productLoader.showNotification(message, 'error');
+                        } else {
+                            alert(message);
+                        }
+                    }
+                } else {
+                    alert('Fonctionnalité "Ajouter au panier" - Quantité: ' + quantity);
+                }
+            });
+        }
+        
+        // Fonction utilitaire pour récupérer l'ID du produit
+        function getProductIdFromPage() {
+            // Essayer de récupérer depuis l'URL
+            const pathParts = window.location.pathname.split('/');
+            const lastPart = pathParts[pathParts.length - 1];
+            const id = parseInt(lastPart);
+            
+            if (!isNaN(id)) {
+                return id;
+            }
+            
+            // Essayer depuis un data-attribute
+            const productElement = document.querySelector('[data-product-id]');
+            if (productElement) {
+                return productElement.getAttribute('data-product-id');
+            }
+            
+            return null;
+        }
+    }
+    </script>
 </head>
 @extends('layouts.app')
 
-@section('title', 'Produit- Shopecart')
+@section('title', 'Détails Produit - Shopcart')
 
 @section('content')
-  <main class="main-content-container">
-      
+<main class="main-content-container">
+    
+    <!-- Section détail produit -->
     <div class="product-detail-container">
         <div class="product-detail-flex">
+            <!-- Images produit -->
             <div class="product-detail-left">
                 <div class="image-gallery-box">
                     <div class="main-product-image">
@@ -36,17 +242,16 @@
                             <img src="/assets/images/C2.jpeg" alt="Vue 2" data-image="/assets/images/C2.jpeg">
                         </div>
                         <div class="thumbnail">
-                            <img src="/assets/images/C3.png" alt="Vue 3" data-image="/assets/images/C3.jpeg">
+                            <img src="/assets/images/C3.png" alt="Vue 3" data-image="/assets/images/C3.png">
                         </div>
                         <div class="thumbnail">
                             <img src="/assets/images/C4.jpeg" alt="Vue 4" data-image="/assets/images/C4.jpeg">
                         </div>
                     </div>
                 </div>
-                
-                
             </div>
 
+            <!-- Informations produit -->
             <div class="product-detail-right">
                 <div class="product-info-box">
                     <div class="new-tag-wrapper">
@@ -67,7 +272,7 @@
                     </div>
 
                     <div class="price-info">
-                        <span class="main-price">15.999FCFA</span>
+                        <span class="main-price">15.999 FCFA</span>
                         <span class="tax-info">TTC</span>
                     </div>
 
@@ -107,938 +312,59 @@
                             Ajouter au panier
                         </button>
                     </div>
-
-                    
                 </div>
-                
-                
             </div>
         </div>
     </div>
     
-        <section class="products-section">
-            <h2 class="section-title" id="title-best-sellers">
-                <span class="gradient-blue-purple">Best Sellers</span>
-            </h2>
-            <p class="section-subtitle">Nos meilleures ventes</p>
-            <div class="products-grid" id="best-sellers-grid">
-                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C2.jpeg" alt="QuietComfort 45" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Bose</p>
-                        <h3 class="product-title-card">QuietComfort 45</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">299 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 4]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
-                        <div class="product-tag tag-new tag-right">NOUVEAU</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM5</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">349 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Jabra</p>
-                        <h3 class="product-title-card">Elite 85h Titanium Black</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.7)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">249 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 10]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C3.png" alt="K371 Studio" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">AKG</p>
-                        <h3 class="product-title-card">K371 Studio</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">139 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 13]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="WH-1000XM4" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM4</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">19 990 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="QuietComfort 45" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Bose</p>
-                        <h3 class="product-title-card">QuietComfort 45</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">299 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 4]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
-                        <div class="product-tag tag-new tag-right">NOUVEAU</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM5</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">349 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Jabra</p>
-                        <h3 class="product-title-card">Elite 85h Titanium Black</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.7)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">249 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 10]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C3.png" alt="K371 Studio" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">AKG</p>
-                        <h3 class="product-title-card">K371 Studio</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">139 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 13]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="WH-1000XM4" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM4</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">19 990 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-               <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="QuietComfort 45" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Bose</p>
-                        <h3 class="product-title-card">QuietComfort 45</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">299 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 4]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
-                        <div class="product-tag tag-new tag-right">NOUVEAU</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM5</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">349 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Jabra</p>
-                        <h3 class="product-title-card">Elite 85h Titanium Black</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.7)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">249 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C3.png" alt="K371 Studio" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">AKG</p>
-                        <h3 class="product-title-card">K371 Studio</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">139 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 13]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="WH-1000XM4" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM4</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">19 990 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 14]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/M3.png" alt="WH-1000XM4" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM4</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">19 990 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 15]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C7.jpeg" alt="ATH-M50x Studio" class="product-image">
-                        <div class="product-tag tag-new tag-right">NOUVEAU</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Audio-Technica</p>
-                        <h3 class="product-title-card">ATH-M50x Studio</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">200 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 16]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="ATH-M50x Studio" class="product-image">
-                        <div class="product-tag tag-new tag-right">NOUVEAU</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Audio-Technica</p>
-                        <h3 class="product-title-card">ATH-M50x Studio</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">200 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="QuietComfort 45" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Bose</p>
-                        <h3 class="product-title-card">QuietComfort 45</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">299 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
-                        <div class="product-tag tag-new tag-right">NOUVEAU</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM5</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">349 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                </div>
-        </section>
-        <div class="pagination" id="pagination-best-sellers">
-            <button class="page-btn" disabled data-direction="prev" data-grid-id="best-sellers-grid">
-                    <i class="fas fa-chevron-left"></i> Précédent
-            </button>
-                
-            <button class="page-num-active" data-page="1" data-grid-id="best-sellers-grid">1</button>
-            <button class="page-num" data-page="2" data-grid-id="best-sellers-grid">2</button>
-            <button class="page-num" data-page="3" data-grid-id="best-sellers-grid">3</button>
-                
-            <button class="page-btn" data-direction="next" data-grid-id="best-sellers-grid">
-                Suivant <i class="fas fa-chevron-right"></i>
-            </button>
+    <!-- Section: Best Sellers (chargée dynamiquement) -->
+    <section class="products-section">
+        <h2 class="section-title" id="title-best-sellers">
+            <span class="gradient-blue-purple">Best Sellers</span>
+        </h2>
+        <p class="section-subtitle">Nos meilleures ventes</p>
+        <div class="products-grid" id="best-sellers-grid">
+            <!-- Les best-sellers seront chargés ici par JavaScript -->
         </div>
-        <div class="progress-bar-row">
-            <hr class="progress-bar-segment-1">
-            <hr class="progress-bar-segment-2">
-            <hr class="progress-bar-segment-3">
+    </section>
+    
+    <!-- Pagination Best Sellers -->
+    <div class="pagination" id="pagination-best-sellers">
+        <button class="page-btn" disabled data-direction="prev" data-grid-id="best-sellers-grid">
+            <i class="fas fa-chevron-left"></i> Précédent
+        </button>
+        <button class="page-num-active" data-page="1" data-grid-id="best-sellers-grid">1</button>
+        <button class="page-btn" data-direction="next" data-grid-id="best-sellers-grid">
+            Suivant <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+    
+    <div class="progress-bar-row">
+        <hr class="progress-bar-segment-1">
+        <hr class="progress-bar-segment-2">
+        <hr class="progress-bar-segment-3">
+    </div>
+    
+    <!-- Section: Produits pour vous (chargée dynamiquement) -->
+    <section class="products-section">
+        <h2 class="section-title" id="title-for-you">
+            <span class="gradient-blue-purple">Produits pour vous</span>
+        </h2>
+        <p class="section-subtitle">Sélection basée sur vos préférences</p>
+        <div class="products-grid" id="products-for-you-grid">
+            <!-- Les recommandations seront chargées ici par JavaScript -->
         </div>
-        
-        
-        <section class="products-section">
-            <h2 class="section-title" id="title-for-you">
-                <span class="gradient-blue-purple">Produits pour vous</span>
-            </h2>
-            <p class="section-subtitle">Sélection basée sur vos préférences</p>
-            <div class="products-grid" id="products-for-you-grid">
-            
-                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card" data-id="1" data-brand="sennheiser" data-price-raw="150000" data-rating-raw="4.4">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
-                        <div class="product-tag tag-premium">PREMIUM</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sennheiser</p>
-                        <h3 class="product-title-card">Momentum Sport Orange</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.4)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">150 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="beats by dre" data-price-raw="220000" data-rating-raw="4.5">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C6.jpeg" alt="Studio 3 Wireless" class="product-image">
-                        <div class="product-tag tag-promo">-25%</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Beats by Dre</p>
-                        <h3 class="product-title-card">Studio 3 Wireless</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.5)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">220 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card" data-id="3" data-brand="bose" data-price-raw="299000" data-rating-raw="4.8">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C" alt="QuietComfort 45" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Bose</p>
-                        <h3 class="product-title-card">QuietComfort 45</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">299 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 4]) }}" class="product-card" data-id="4" data-brand="sony" data-price-raw="349000" data-rating-raw="4.9">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
-                        <div class="product-tag tag-new tag-right">NOUVEAU</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM5</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">349 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 5]) }}" class="product-card" data-id="5" data-brand="jbl" data-price-raw="129000" data-rating-raw="4.2">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C13.jpeg" alt="Live 660NC" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">JBL</p>
-                        <h3 class="product-title-card">Live 660NC</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
-                            <span class="rating-text">(4.2)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">129 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 6]) }}" class="product-card" data-id="6" data-brand="marshall" data-price-raw="179000" data-rating-raw="4.6">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/M4.jpeg" alt="Major IV Bluetooth" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Marshall</p>
-                        <h3 class="product-title-card">Major IV Bluetooth</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.6)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">179 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 7]) }}" class="product-card" data-id="7" data-brand="anker" data-price-raw="89000" data-rating-raw="4.3">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C7.jpeg" alt="Soundcore Life Q35" class="product-image">
-                        <div class="product-tag tag-promo">-15%</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Anker</p>
-                        <h3 class="product-title-card">Soundcore Life Q35</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.3)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">89 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 8]) }}" class="product-card" data-id="8" data-brand="skullcandy" data-price-raw="159000" data-rating-raw="4.0">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C5.jpeg" alt="Crusher Evo" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Skullcandy</p>
-                        <h3 class="product-title-card">Crusher Evo</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
-                            <span class="rating-text">(4.0)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">159 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card" data-id="9" data-brand="jabra" data-price-raw="249000" data-rating-raw="4.7">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Jabra</p>
-                        <h3 class="product-title-card">Elite 85h Titanium Black</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.7)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">249 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card" data-id="1" data-brand="sennheiser" data-price-raw="150000" data-rating-raw="4.4">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
-                        <div class="product-tag tag-premium">PREMIUM</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sennheiser</p>
-                        <h3 class="product-title-card">Momentum Sport Orange</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.4)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">150 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="beats by dre" data-price-raw="220000" data-rating-raw="4.5">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C6.jpeg" alt="Studio 3 Wireless" class="product-image">
-                        <div class="product-tag tag-promo">-25%</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Beats by Dre</p>
-                        <h3 class="product-title-card">Studio 3 Wireless</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.5)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">220 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card" data-id="3" data-brand="bose" data-price-raw="299000" data-rating-raw="4.8">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C" alt="QuietComfort 45" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Bose</p>
-                        <h3 class="product-title-card">QuietComfort 45</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">299 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card" data-id="4" data-brand="sony" data-price-raw="349000" data-rating-raw="4.9">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
-                        <div class="product-tag tag-new tag-right">NOUVEAU</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM5</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">349 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card" data-id="5" data-brand="jbl" data-price-raw="129000" data-rating-raw="4.2">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C13.jpeg" alt="Live 660NC" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">JBL</p>
-                        <h3 class="product-title-card">Live 660NC</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
-                            <span class="rating-text">(4.2)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">129 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 6]) }}" class="product-card" data-id="6" data-brand="marshall" data-price-raw="179000" data-rating-raw="4.6">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/M4.jpeg" alt="Major IV Bluetooth" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Marshall</p>
-                        <h3 class="product-title-card">Major IV Bluetooth</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.6)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">179 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 7]) }}" class="product-card" data-id="7" data-brand="anker" data-price-raw="89000" data-rating-raw="4.3">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C7.jpeg" alt="Soundcore Life Q35" class="product-image">
-                        <div class="product-tag tag-promo">-15%</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Anker</p>
-                        <h3 class="product-title-card">Soundcore Life Q35</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.3)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">89 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 8]) }}" class="product-card" data-id="8" data-brand="skullcandy" data-price-raw="159000" data-rating-raw="4.0">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C5.jpeg" alt="Crusher Evo" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Skullcandy</p>
-                        <h3 class="product-title-card">Crusher Evo</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
-                            <span class="rating-text">(4.0)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">159 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card" data-id="9" data-brand="jabra" data-price-raw="249000" data-rating-raw="4.7">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Jabra</p>
-                        <h3 class="product-title-card">Elite 85h Titanium Black</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.7)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">249 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card" data-id="1" data-brand="sennheiser" data-price-raw="150000" data-rating-raw="4.4">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
-                        <div class="product-tag tag-premium">PREMIUM</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sennheiser</p>
-                        <h3 class="product-title-card">Momentum Sport Orange</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.4)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">150 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="beats by dre" data-price-raw="220000" data-rating-raw="4.5">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C6.jpeg" alt="Studio 3 Wireless" class="product-image">
-                        <div class="product-tag tag-promo">-25%</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Beats by Dre</p>
-                        <h3 class="product-title-card">Studio 3 Wireless</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.5)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">220 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card" data-id="3" data-brand="bose" data-price-raw="299000" data-rating-raw="4.8">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C" alt="QuietComfort 45" class="product-image">
-                        <div class="product-tag tag-best-seller">TOP VENTE</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Bose</p>
-                        <h3 class="product-title-card">QuietComfort 45</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">299 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 4]) }}" class="product-card" data-id="4" data-brand="sony" data-price-raw="349000" data-rating-raw="4.9">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
-                        <div class="product-tag tag-new tag-right">NOUVEAU</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Sony</p>
-                        <h3 class="product-title-card">WH-1000XM5</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.9)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">349 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 5]) }}" class="product-card" data-id="5" data-brand="jbl" data-price-raw="129000" data-rating-raw="4.2">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C13.jpeg" alt="Live 660NC" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">JBL</p>
-                        <h3 class="product-title-card">Live 660NC</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
-                            <span class="rating-text">(4.2)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">129 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 6]) }}" class="product-card" data-id="6" data-brand="marshall" data-price-raw="179000" data-rating-raw="4.6">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/M4.jpeg" alt="Major IV Bluetooth" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Marshall</p>
-                        <h3 class="product-title-card">Major IV Bluetooth</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.6)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">179 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 7]) }}" class="product-card" data-id="7" data-brand="anker" data-price-raw="89000" data-rating-raw="4.3">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C7.jpeg" alt="Soundcore Life Q35" class="product-image">
-                        <div class="product-tag tag-promo">-15%</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Anker</p>
-                        <h3 class="product-title-card">Soundcore Life Q35</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.3)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">89 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 8]) }}" class="product-card" data-id="8" data-brand="skullcandy" data-price-raw="159000" data-rating-raw="4.0">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C5.jpeg" alt="Crusher Evo" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Skullcandy</p>
-                        <h3 class="product-title-card">Crusher Evo</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
-                            <span class="rating-text">(4.0)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">159 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card" data-id="9" data-brand="jabra" data-price-raw="249000" data-rating-raw="4.7">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Jabra</p>
-                        <h3 class="product-title-card">Elite 85h Titanium Black</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.7)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">249 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                <a href="{{ route('casque_details', ['id' => 10]) }}" class="product-card" data-id="10" data-brand="akg" data-price-raw="139000" data-rating-raw="4.8">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/C3.png" alt="K371 Studio" class="product-image">
-                        
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">AKG</p>
-                        <h3 class="product-title-card">K371 Studio</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.8)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">139 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                </div>
-        </section>
-        
-        <div class="pagination" id="pagination-for-you">
-            <button class="page-btn" disabled data-direction="prev" data-grid-id="products-for-you-grid">
-                    <i class="fas fa-chevron-left"></i> Précédent
-            </button>
-                
-            <button class="page-num-active" data-page="1" data-grid-id="products-for-you-grid">1</button>
-            <button class="page-num" data-page="2" data-grid-id="products-for-you-grid">2</button>
-            <button class="page-num" data-page="3" data-grid-id="products-for-you-grid">3</button>
-                
-            <button class="page-btn" data-direction="next" data-grid-id="products-for-you-grid">
-                Suivant <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-
-        <div class="progress-bar-row">
-            <hr class="progress-bar-segment-1">
-            <hr class="progress-bar-segment-2">
-            <hr class="progress-bar-segment-3">
-        </div>
-
-        
-       
-  </main>
- @endsection
+    </section>
+    
+    <!-- Pagination Produits pour vous -->
+    <div class="pagination" id="pagination-for-you">
+        <button class="page-btn" disabled data-direction="prev" data-grid-id="products-for-you-grid">
+            <i class="fas fa-chevron-left"></i> Précédent
+        </button>
+        <button class="page-num-active" data-page="1" data-grid-id="products-for-you-grid">1</button>
+        <button class="page-btn" data-direction="next" data-grid-id="products-for-you-grid">
+            Suivant <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+</main>
+@endsection

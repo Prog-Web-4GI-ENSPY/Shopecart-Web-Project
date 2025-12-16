@@ -8,24 +8,34 @@ class UniversalProductLoader {
             defaultImage: 'https://via.placeholder.com/300x200?text=Produit'
         };
         this.gridConfig = null;
+        this.isInitialized = false;
     }
 
     /**
      * Initialise le chargement pour une catégorie
      */
     async init(categoryName, gridConfig = {}, options = {}) {
-        console.log(`🎯 Initialisation pour: "${categoryName}"`);
+        console.log(`🎯 UniversalProductLoader - Initialisation pour: "${categoryName}"`);
+        
+        if (this.isInitialized) {
+            console.log('⚠️ Déjà initialisé, rafraîchissement...');
+            await this.refresh();
+            return;
+        }
         
         this.gridConfig = gridConfig;
         this.options = { ...this.config, ...options };
         
         try {
-            // 1. Afficher toutes les catégories disponibles
+            // 1. Debug: Afficher toutes les catégories disponibles
             await this.showAvailableCategories();
             
             // 2. Trouver la catégorie spécifique
             this.currentCategory = await this.findCategory(categoryName);
-            if (!this.currentCategory) return;
+            if (!this.currentCategory) {
+                console.error(`❌ Catégorie "${categoryName}" non trouvée`);
+                return;
+            }
             
             // 3. Charger les produits
             await this.loadProductsForAllGrids();
@@ -33,26 +43,30 @@ class UniversalProductLoader {
             // 4. Initialiser les événements
             this.initEventListeners();
             
-            console.log('✅ Chargement terminé avec succès');
+            this.isInitialized = true;
+            console.log('✅ UniversalProductLoader initialisé avec succès');
             
         } catch (error) {
-            console.error('❌ Erreur:', error);
+            console.error('❌ Erreur UniversalProductLoader:', error);
             this.showErrorOnAllGrids(`Erreur: ${error.message}`);
         }
     }
 
     /**
-     * Affiche les catégories disponibles
+     * Affiche les catégories disponibles pour débogage
      */
     async showAvailableCategories() {
         try {
             const categories = await this.api.getAllCategories();
-            console.log('📊 Catégories disponibles:');
+            console.log('📊 === CATÉGORIES DISPONIBLES ===');
             categories.forEach(cat => {
-                console.log(`  • ${cat.id}: "${cat.name}"`);
+                console.log(`  • ${cat.id}: "${cat.name}" (slug: "${cat.slug}")`);
             });
+            console.log('================================');
+            return categories;
         } catch (error) {
-            console.warn('Impossible d\'afficher les catégories:', error);
+            console.warn('⚠️ Impossible d\'afficher les catégories:', error);
+            return [];
         }
     }
 
@@ -60,27 +74,49 @@ class UniversalProductLoader {
      * Trouve une catégorie par son nom
      */
     async findCategory(categoryName) {
-        console.log(`🔍 Recherche: "${categoryName}"`);
+        console.log(`🔍 Recherche catégorie: "${categoryName}"`);
         
-        const category = await this.api.findCategoryByName(categoryName);
+        // D'abord essayer avec le nom exact
+        let category = await this.api.findCategoryByName(categoryName);
         
         if (!category) {
-            // Essayer avec des variations
             console.log('🔄 Essai avec variations...');
             
+            // Générer des variations
             const variations = this.generateCategoryVariations(categoryName);
+            
             for (const variation of variations) {
                 console.log(`  → Essai: "${variation}"`);
-                const cat = await this.api.findCategoryByName(variation);
-                if (cat) {
+                category = await this.api.findCategoryByName(variation);
+                if (category) {
                     console.log(`✅ Trouvé avec variation: "${variation}"`);
-                    return cat;
+                    return category;
                 }
             }
             
-            // Afficher l'erreur
-            await this.showCategoryError(categoryName);
-            return null;
+            // Si toujours pas trouvé, chercher manuellement
+            const allCategories = await this.api.getAllCategories();
+            const searchLower = categoryName.toLowerCase();
+            
+            // Chercher par inclusion
+            category = allCategories.find(cat => {
+                const catNameLower = cat.name.toLowerCase();
+                const catSlugLower = cat.slug ? cat.slug.toLowerCase() : '';
+                
+                return catNameLower.includes(searchLower) || 
+                       searchLower.includes(catNameLower) ||
+                       (catSlugLower && catSlugLower.includes(searchLower));
+            });
+            
+            if (!category && allCategories.length > 0) {
+                // Prendre la première catégorie comme fallback
+                console.log(`⚠️ Catégorie non trouvée, utilisation de la première catégorie disponible`);
+                category = allCategories[0];
+            }
+        }
+        
+        if (category) {
+            console.log(`✅ Catégorie sélectionnée: "${category.name}" (ID: ${category.id})`);
         }
         
         return category;
@@ -94,13 +130,47 @@ class UniversalProductLoader {
         const lowerName = name.toLowerCase();
         
         // Variations pour "Casques audio"
-        if (lowerName.includes('casque') || lowerName.includes('audio')) {
-            variations.push('Casques audio', 'casques audio', 'Casque audio', 'casque audio');
+        if (lowerName.includes('casque') || lowerName.includes('audio') || lowerName.includes('son')) {
+            variations.push(
+                'Casques audio',
+                'casques audio',
+                'Casque audio',
+                'casque audio',
+                'Audio',
+                'audio',
+                'Électronique',
+                'électronique',
+                'Écouteurs',
+                'écouteurs'
+            );
         }
         
-        // Variations pour "Disques durs"
-        if (lowerName.includes('disque') || lowerName.includes('dur')) {
-            variations.push('Disques durs', 'disques durs', 'Disque dur', 'disque dur');
+        // Variations pour "Électronique"
+        if (lowerName.includes('électronique') || lowerName.includes('electronique')) {
+            variations.push(
+                'Électronique',
+                'électronique',
+                'Electronique',
+                'electronique',
+                'Informatique',
+                'informatique',
+                'High-tech',
+                'high-tech'
+            );
+        }
+        
+        // Variations pour "Téléphones"
+        if (lowerName.includes('téléphone') || lowerName.includes('telephone')) {
+            variations.push(
+                'Téléphones portables',
+                'téléphones portables',
+                'Téléphone portable',
+                'téléphone portable',
+                'Smartphones',
+                'smartphones',
+                'Téléphones',
+                'téléphones'
+            );
         }
         
         // Variations pour "Manettes"
@@ -108,12 +178,12 @@ class UniversalProductLoader {
             variations.push('Manettes', 'manettes', 'Manette', 'manette');
         }
         
-        // Variations pour "Téléphones"
-        if (lowerName.includes('téléphone') || lowerName.includes('telephone')) {
-            variations.push('Téléphones portables', 'téléphones portables', 'Téléphone', 'téléphone');
+        // Variations pour "Disques durs"
+        if (lowerName.includes('disque') || lowerName.includes('dur')) {
+            variations.push('Disques durs', 'disques durs', 'Disque dur', 'disque dur');
         }
         
-        return variations;
+        return [...new Set(variations)]; // Supprimer les doublons
     }
 
     /**
@@ -124,24 +194,37 @@ class UniversalProductLoader {
             const categories = await this.api.getAllCategories();
             
             const errorHtml = `
-                <div class="category-error">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Catégorie non trouvée</h3>
-                    <p>La catégorie <strong>"${searchName}"</strong> n'existe pas.</p>
-                    
-                    <div class="categories-list">
-                        <h4>Catégories disponibles :</h4>
-                        ${categories.map(cat => `
-                            <div class="category-item">
-                                <span class="category-name">"${cat.name}"</span>
-                                <span class="category-id">(ID: ${cat.id})</span>
-                            </div>
-                        `).join('')}
+                <div class="category-error" style="grid-column: 1 / -1;">
+                    <div style="background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); 
+                                border: 2px solid #fc8181; border-radius: 12px; padding: 2rem; margin: 2rem 0;">
+                        <h3 style="color: #c53030; font-size: 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fas fa-exclamation-triangle"></i> Catégorie non trouvée
+                        </h3>
+                        <p style="color: #4a5568; margin-bottom: 1.5rem;">
+                            La catégorie <strong>"${searchName}"</strong> n'existe pas.
+                        </p>
+                        
+                        <div style="background: white; border-radius: 8px; padding: 1rem; border: 1px solid #e2e8f0;">
+                            <h4 style="color: #4a5568; margin: 0 0 1rem 0;">Catégories disponibles :</h4>
+                            ${categories.map(cat => `
+                                <div style="display: flex; justify-content: space-between; align-items: center; 
+                                            padding: 0.75rem 1rem; border-bottom: 1px solid #edf2f7;">
+                                    <span style="font-weight: 600; color: #2d3748;">"${cat.name}"</span>
+                                    <span style="color: #718096; font-size: 0.875rem; background: #edf2f7; 
+                                            padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                        ID: ${cat.id}
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); 
+                                    border: 1px solid #81e6d9; border-radius: 8px; padding: 1rem; 
+                                    margin-top: 1.5rem; display: flex; align-items: center; gap: 0.75rem; color: #234e52;">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Essayez l'un des noms exacts ci-dessus.</span>
+                        </div>
                     </div>
-                    
-                    <p class="suggestion">
-                        <i class="fas fa-lightbulb"></i>
-                        Utilisez l'un des noms exacts ci-dessus.
-                    </p>
                 </div>
             `;
             
@@ -156,7 +239,12 @@ class UniversalProductLoader {
      * Charge les produits pour toutes les grilles
      */
     async loadProductsForAllGrids() {
-        console.log(`📦 Chargement pour "${this.currentCategory.name}"`);
+        console.log(`📦 Chargement produits pour "${this.currentCategory.name}"`);
+        
+        if (!this.gridConfig || Object.keys(this.gridConfig).length === 0) {
+            console.warn('⚠️ Aucune configuration de grille définie');
+            return;
+        }
         
         for (const [gridType, selector] of Object.entries(this.gridConfig)) {
             const gridElement = document.querySelector(selector);
@@ -223,7 +311,7 @@ class UniversalProductLoader {
             return;
         }
         
-        console.log(`    ✅ ${products.length} produit(s) affiché(s)`);
+        console.log(`    ✅ ${products.length} produit(s) affiché(s) dans ${gridType}`);
         
         products.forEach(product => {
             const card = this.createProductCard(product);
@@ -246,6 +334,7 @@ class UniversalProductLoader {
         const rating = product.rating || 0;
         const inStock = product.stock_quantity > 0;
         const imageUrl = product.image_url || product.image || this.config.defaultImage;
+        const productUrl = `/products/${product.id}`;
 
         // Déterminer le tag
         let tagHtml = '';
@@ -259,19 +348,17 @@ class UniversalProductLoader {
             tagHtml = `<div class="product-tag tag-premium">PREMIUM</div>`;
         }
         
-        // Déterminer si c'est un best-seller (par exemple, si rating > 4.5)
-        const isBestSeller = rating > 4.5;
-        
         card.innerHTML = `
-            <a href="/products/${product.id}" class="product-card-link">
+            <a href="${productUrl}" class="product-card-link" style="text-decoration: none; color: inherit;">
                 <div class="product-image-wrapper">
-                    <img src="${imageUrl}" alt="${product.name}" class="product-image">
+                    <img src="${imageUrl}" alt="${product.name}" class="product-image" 
+                         onerror="this.src='${this.config.defaultImage}'">
                     ${tagHtml}
                 </div>
                 
                 <div class="product-info">
                     <p class="product-brand">${product.brand || product.manufacturer || 'Marque'}</p>
-                    <h3 class="product-title-card">${product.name}</h3>
+                    <h3 class="product-title-card">${this.truncateText(product.name, 50)}</h3>
                     
                     <div class="rating-info">
                         <div class="stars-list">${this.createStars(rating)}</div>
@@ -280,15 +367,20 @@ class UniversalProductLoader {
                     
                     <div class="product-actions">
                         <div class="price-info">
-                            ${oldPrice ? `<span class="old-price">${oldPrice}</span>` : ''}
-                            <span class="product-price">${price}</span>
+                            ${oldPrice ? `<span class="old-price" style="text-decoration: line-through; color: #999; font-size: 14px;">${oldPrice}</span>` : ''}
+                            <span class="product-price" style="font-size: 18px; font-weight: bold; color: #333;">${price}</span>
                         </div>
-                        <button class="add-to-cart-btn" data-product-id="${product.id}" ${!inStock ? 'disabled' : ''}>
+                        <button class="add-to-cart-btn" data-product-id="${product.id}" ${!inStock ? 'disabled' : ''}
+                                style="padding: 15px; background: white; border: 2px solid #1e3a8a; border-radius: 50%; 
+                                       cursor: pointer; color: #1e3a8a; font-weight: 600;">
                             <i class="fas fa-shopping-cart"></i>
                         </button>
                     </div>
                     
-                    <div class="product-stock ${inStock ? 'in-stock' : 'out-of-stock'}">
+                    <div class="product-stock ${inStock ? 'in-stock' : 'out-of-stock'}" 
+                         style="font-size: 0.875rem; padding: 0.5rem; border-radius: 0.25rem; margin-top: 0.5rem; 
+                                display: flex; align-items: center; gap: 0.5rem;
+                                ${inStock ? 'background-color: #dcfce7; color: #059669;' : 'background-color: #fee2e2; color: #dc2626;'}">
                         <i class="fas ${inStock ? 'fa-check-circle' : 'fa-times-circle'}"></i>
                         ${inStock ? 'En stock' : 'Rupture de stock'}
                     </div>
@@ -304,13 +396,14 @@ class UniversalProductLoader {
      */
     showNoProducts(gridElement, gridType) {
         const typeLabel = gridType.includes('featured') ? 'en vedette' : 
-                         gridType.includes('promo') ? 'en promotion' : '';
+                         gridType.includes('promo') ? 'en promotion' : 
+                         '';
         
         gridElement.innerHTML = `
             <div class="no-products" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                <i class="fas fa-box-open fa-3x" style="color: var(--color-gray-400); margin-bottom: 20px;"></i>
-                <h3 style="color: var(--color-gray-700); margin-bottom: 10px;">Aucun produit ${typeLabel}</h3>
-                <p style="color: var(--color-gray-500);">
+                <i class="fas fa-box-open fa-3x" style="color: #9ca3af; margin-bottom: 20px;"></i>
+                <h3 style="color: #374151; margin-bottom: 10px;">Aucun produit ${typeLabel}</h3>
+                <p style="color: #6b7280;">
                     Aucun produit ${typeLabel ? typeLabel + ' ' : ''}dans la catégorie 
                     <strong>"${this.currentCategory.name}"</strong>.
                 </p>
@@ -328,13 +421,6 @@ class UniversalProductLoader {
                 const btn = e.target.closest('.add-to-cart-btn');
                 const productId = btn.dataset.productId;
                 this.addToCart(productId);
-            }
-            
-            // Voir les détails
-            if (e.target.closest('.btn-view')) {
-                const btn = e.target.closest('.btn-view');
-                const productId = btn.dataset.productId;
-                this.viewProduct(productId);
             }
         });
     }
@@ -375,9 +461,9 @@ class UniversalProductLoader {
         element.innerHTML = `
             <div class="loader" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
                 <div class="spinner">
-                    <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--color-blue-500);"></i>
+                    <i class="fas fa-spinner fa-spin fa-3x" style="color: #3b82f6;"></i>
                 </div>
-                <p style="color: var(--color-gray-600); margin-top: 20px; font-size: 1.1rem;">Chargement...</p>
+                <p style="color: #4b5563; margin-top: 20px; font-size: 1.1rem;">Chargement des produits...</p>
             </div>
         `;
     }
@@ -385,9 +471,11 @@ class UniversalProductLoader {
     showError(element, message) {
         element.innerHTML = `
             <div class="error" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                <i class="fas fa-exclamation-triangle fa-3x" style="color: var(--color-red-600); margin-bottom: 20px;"></i>
-                <p style="color: var(--color-gray-700); margin-bottom: 20px; font-size: 1.1rem;">${message}</p>
-                <button class="retry-btn" onclick="location.reload()">
+                <i class="fas fa-exclamation-triangle fa-3x" style="color: #dc2626; margin-bottom: 20px;"></i>
+                <p style="color: #374151; margin-bottom: 20px; font-size: 1.1rem;">${message}</p>
+                <button class="retry-btn" onclick="location.reload()" 
+                        style="background-color: #1e40af; color: white; border: none; padding: 0.75rem 1.5rem; 
+                               border-radius: 0.5rem; cursor: pointer; font-weight: 500;">
                     <i class="fas fa-redo"></i> Réessayer
                 </button>
             </div>
@@ -400,7 +488,11 @@ class UniversalProductLoader {
         Object.values(this.gridConfig).forEach(selector => {
             const element = document.querySelector(selector);
             if (element) {
-                element.innerHTML = `<div class="global-error" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--color-red-600);">${message}</div>`;
+                element.innerHTML = `
+                    <div class="global-error" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                        ${message}
+                    </div>
+                `;
             }
         });
     }
@@ -422,8 +514,46 @@ class UniversalProductLoader {
     }
 
     showNotification(message, type = 'info') {
+        // Créer le style si nécessaire
+        if (!document.getElementById('notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                .universal-notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px 20px;
+                    background: #059669;
+                    color: white;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    z-index: 10000;
+                    transform: translateX(120%);
+                    transition: transform 0.3s ease;
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                    min-width: 300px;
+                }
+                
+                .universal-notification.show {
+                    transform: translateX(0);
+                }
+                
+                .universal-notification.error {
+                    background: #dc2626;
+                }
+                
+                .universal-notification.info {
+                    background: #3b82f6;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
         const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
+        notification.className = `universal-notification ${type}`;
         notification.innerHTML = `
             <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
             <span>${message}</span>
@@ -443,7 +573,7 @@ class UniversalProductLoader {
      */
     async refresh() {
         if (this.currentCategory && this.gridConfig) {
-            console.log('🔄 Actualisation...');
+            console.log('🔄 Actualisation des produits...');
             await this.loadProductsForAllGrids();
         }
     }
@@ -451,55 +581,3 @@ class UniversalProductLoader {
 
 // Instance globale
 window.productLoader = new UniversalProductLoader();
-
-// CSS minimal pour les notifications
-const style = document.createElement('style');
-style.textContent = `
-    .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        background: var(--color-green-600);
-        color: white;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        z-index: 10000;
-        transform: translateX(120%);
-        transition: transform 0.3s ease;
-        box-shadow: var(--shadow-lg);
-        min-width: 300px;
-    }
-    
-    .notification.show {
-        transform: translateX(0);
-    }
-    
-    .notification.error {
-        background: var(--color-red-600);
-    }
-    
-    .notification.info {
-        background: var(--color-blue-600);
-    }
-    
-    .notification i {
-        font-size: 1.25rem;
-    }
-    
-    @media (max-width: 768px) {
-        .notification {
-            left: 20px;
-            right: 20px;
-            min-width: auto;
-            transform: translateY(-100%);
-        }
-        
-        .notification.show {
-            transform: translateY(0);
-        }
-    }
-`;
-document.head.appendChild(style);

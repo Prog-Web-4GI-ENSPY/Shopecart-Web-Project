@@ -1,48 +1,122 @@
-
+<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Casques Audio | Shopcart</title> 
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('assets/css/header.css') }}" >
-    <link rel="stylesheet" href="{{ asset('assets/css/products_casque.css') }}" >
-     <script src="{{ asset('assets/js/api-service.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('assets/css/header.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/products_casque.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/footer.css') }}">
-    <script src="{{ asset('assets/js/product_filtres.js')  }}" defer></script> 
-    <script src="{{ asset('assets/js/product_pagination.js') }}" defer></script> 
-    <script src="{{ asset('assets/js/product_navigation_casques.js') }}" defer></script> 
-    <script src="{{ asset('assets/js/carousel_auto.js') }}" defer></script> 
-    <script defer src="{{ asset('assets/js/newsletter.js') }}"></script>
+    
+    <!-- Scripts -->
+    <script src="{{ asset('assets/js/api-service.js') }}" defer></script>
+    <script src="{{ asset('assets/js/universal-product-loader.js') }}" defer></script>
     <script src="{{ asset('assets/js/cart-manager.js') }}" defer></script>
     
-    <script src="{{ asset('assets/js/universal-product-loader.js') }}" defer></script>
+    <!-- Script d'initialisation -->
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Configuration des grilles
-    const gridConfig = {
-        all: '#grid-casques-all',          // Tous les casques
-        featured: '#grid-casques-featured' // Casques en vedette
-    };
-    
-    // La catégorie EXACTE de votre base de données
-    const categoryName = 'Électronique'; // Note: minuscule 'audio'
-    
-    // Initialiser le chargeur
-    window.productLoader.init(categoryName, gridConfig, {
-        productsPerPage: 8
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('🚀 Initialisation de la page produits...');
+        
+        // Attendre que l'API soit prête
+        await new Promise(resolve => {
+            const checkApi = setInterval(() => {
+                if (window.apiService) {
+                    clearInterval(checkApi);
+                    resolve();
+                }
+            }, 100);
+        });
+        
+        // Configuration des grilles
+        const gridConfig = {
+            all: '#grid-casques-all',
+            featured: '#grid-casques-featured'
+        };
+        
+        // Essayer différentes catégories
+        const categoryNames = ['Électronique', 'Casques audio', 'Audio', 'Casques', 'Informatique'];
+        
+        let loaded = false;
+        
+        for (const categoryName of categoryNames) {
+            if (loaded) break;
+            
+            try {
+                console.log(`🔄 Tentative avec la catégorie: "${categoryName}"`);
+                
+                // Vérifier si cette catégorie existe
+                const category = await window.apiService.findCategoryByName(categoryName);
+                
+                if (category) {
+                    console.log(`✅ Catégorie trouvée: "${category.name}" (ID: ${category.id})`);
+                    
+                    // Initialiser le chargeur
+                    if (window.productLoader) {
+                        await window.productLoader.init(category.name, gridConfig, {
+                            productsPerPage: 8
+                        });
+                        
+                        loaded = true;
+                        console.log(`✅ Chargement réussi avec "${category.name}"`);
+                        break;
+                    }
+                } else {
+                    console.log(`⚠️ Catégorie "${categoryName}" non trouvée`);
+                }
+                
+            } catch (error) {
+                console.warn(`⚠️ Erreur avec "${categoryName}":`, error.message);
+                continue;
+            }
+        }
+        
+        if (!loaded) {
+            console.error('❌ Aucune catégorie valide trouvée');
+            
+            // Afficher un message d'erreur
+            const errorDiv = document.createElement('div');
+            errorDiv.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-exclamation-triangle fa-3x" style="color: #dc2626; margin-bottom: 20px;"></i>
+                    <h3 style="color: #374151; margin-bottom: 10px;">Erreur de chargement</h3>
+                    <p style="color: #6b7280; margin-bottom: 20px;">
+                        Impossible de charger les produits. Veuillez réessayer plus tard.
+                    </p>
+                    <button onclick="location.reload()" style="background-color: #1e40af; color: white; 
+                            border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        <i class="fas fa-redo"></i> Réessayer
+                    </button>
+                </div>
+            `;
+            
+            const grid = document.querySelector('#grid-casques-all');
+            if (grid) {
+                grid.innerHTML = '';
+                grid.appendChild(errorDiv);
+            }
+        }
+        
+        // Initialiser les autres fonctionnalités
+        setTimeout(() => {
+            if (typeof initFilters === 'function') initFilters();
+            if (typeof initPagination === 'function') initPagination();
+        }, 1000);
     });
-});
-</script>
+    </script>
 </head>
 @extends('layouts.app')
 
-@section('title', 'Produit- Shopecart')
+@section('title', 'Casques Audio - Shopcart')
 
 @section('content')
-
 <body>
+    <!-- Hero Banner -->
     <section class="hero-banner">
-        <!--Radio buttons pour controler les slides-->
         <input type="radio" name="slide" id="slide4clone">
         <input type="radio" name="slide" id="slide1" checked>
         <input type="radio" name="slide" id="slide2">
@@ -139,99 +213,102 @@ document.addEventListener('DOMContentLoaded', function() {
             <label for="slide4" class="dot"></label>
         </div>
     </section>
-    
 
     <main class="main-content-container">
-
-            <div class="tag-buttons-group">
-                <div class="filter-button primary-filter">
-                    <i class="fas fa-sliders-h icon-margin-right"></i> Tous les filtres
+        <!-- Filtres -->
+        <div class="tag-buttons-group">
+            <div class="filter-button primary-filter">
+                <i class="fas fa-sliders-h icon-margin-right"></i> Tous les filtres
+            </div>
+            
+            <div class="filter-dropdown" tabindex="0">
+                <input type="radio" name="filters" id="prix-toggle" hidden>
+                <label for="prix-toggle" class="tag-button">
+                    Prix <span class="dropdown-arrow">▼</span>
+                </label>
+                <div class="dropdown-content">
+                    <a href="#" data-price="0-30000"><i class="fas fa-tag"></i> Moins de 30.000 FCFA</a>
+                    <a href="#" data-price="30000-70000"><i class="fas fa-tag"></i> 30.000 - 70.000 FCFA</a>
+                    <a href="#" data-price="70000-150000"><i class="fas fa-tag"></i> 70.000 - 150.000 FCFA</a>
+                    <a href="#" data-price="150000+"><i class="fas fa-tag"></i> Plus de 150.000 FCFA</a>
                 </div>
-                <input type="radio" name="filters" id="none" checked hidden>
-
-                <div class="filter-dropdown" tabindex="0">
-                    <input type="radio" name="filters" id="prix-toggle" hidden >
-                    <label for="prix-toggle" class="tag-button">
-                        Prix <span class="dropdown-arrow">▼</span>
-                    </label>
-                    <div class="dropdown-content">
-                        <a href="#" data-price="0-30000"><i class="fas fa-tag"></i> Moins de 30.000 FCFA</a>
-                        <a href="#" data-price="30000-70000"><i class="fas fa-tag"></i> 30.000 - 70.000 FCFA</a>
-                        <a href="#" data-price="70000-150000"><i class="fas fa-tag"></i> 70.000 - 150.000 FCFA</a>
-                        <a href="#" data-price="150000+"><i class="fas fa-tag"></i> Plus de 150.000 FCFA</a>
-                    </div>
+            </div>
+            
+            <div class="filter-dropdown" tabindex="0">
+                <input type="radio" name="filters" id="marques-toggle" hidden>
+                <label for="marques-toggle" class="tag-button">
+                    Marques <span class="dropdown-arrow">▼</span>
+                </label>
+                <div class="dropdown-content">
+                    <a href="#" data-brand="sony"><i class="fab fa-sony"></i> Sony</a>
+                    <a href="#" data-brand="bose"><i class="fas fa-headphones"></i> Bose</a>
+                    <a href="#" data-brand="sennheiser"><i class="fas fa-volume-up"></i> Sennheiser</a>
+                    <a href="#" data-brand="jbl"><i class="fas fa-music"></i> JBL</a>
                 </div>
-                <div class="filter-dropdown" tabindex="0">
-                    <input type="radio" name="filters" id="marques-toggle" hidden>
-                    <label for="marques-toggle" class="tag-button">
-                        Marques <span class="dropdown-arrow">▼</span>
-                    </label>
-                    <div class="dropdown-content">
-                        <a href="#" data-brand="sony"><i class="fab fa-playstation"></i> Sony (PlayStation)</a>
-                        <a href="#" data-brand="microsoft"><i class="fab fa-xbox"></i> Microsoft (Xbox)</a>
-                        <a href="#" data-brand="nintendo"><i class="fas fa-gamepad"></i> Nintendo</a>
-                        <a href="#" data-brand="razer"><i class="fas fa-snake"></i> Razer</a>
-                        <a href="#" data-brand="logitech"><i class="fas fa-mouse-pointer"></i> Logitech</a>
-                        <a href="#" data-brand="nacon"><i class="fas fa-trophy"></i> Nacon</a>
-                        <a href="#" data-brand="8bitdo"><i class="fas fa-robot"></i> 8BitDo</a>
-                    </div>
+            </div>
+            
+            <div class="filter-dropdown" tabindex="0">
+                <input type="radio" name="filters" id="notes-toggle" hidden>
+                <label for="notes-toggle" class="tag-button">
+                    Notes <span class="dropdown-arrow">▼</span>
+                </label>
+                <div class="dropdown-content">
+                    <a href="#" data-rating="5"><i class="fas fa-star"></i> 5 étoiles</a>
+                    <a href="#" data-rating="4"><i class="fas fa-star"></i> 4 étoiles et plus</a>
+                    <a href="#" data-rating="3"><i class="fas fa-star"></i> 3 étoiles et plus</a>
                 </div>
-                <div class="filter-dropdown" tabindex="0">
-                    <input type="radio" name="filters" id="notes-toggle" hidden>
-                    <label for="notes-toggle" class="tag-button">
-                        Notes <span class="dropdown-arrow">▼</span>
-                    </label>
-                    <div class="dropdown-content">
-                        <a href="#" data-rating="5"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (5.0 étoiles)</a>
-                        <a href="#" data-rating="4.5"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> (4.5 étoiles)</a>
-                        <a href="#" data-rating="4"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (4.0 étoiles)</a>
-                        <a href="#" data-rating="3"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (3.0 étoiles)</a>
-                        <a href="#" data-rating="2"><i class="fas fa-star"></i><i class="fas fa-star"></i> (2.0 étoiles)</a>
-                        <a href="#" data-rating="1"><i class="fas fa-star"></i> (1.0 étoile)</a>
-                    </div>
-                </div>
-                </div>
- 
-      
-       <div class="products-grid" id="grid-casques-all"></div>
-
+            </div>
+        </div>
         
-        <div class="pagination" id="pagination-best-sellers">
-            <button class="page-btn" disabled data-direction="prev" data-grid-id="best-sellers-grid">
-                    <i class="fas fa-chevron-left"></i> Précédent
+        <!-- Section: Tous les produits -->
+        <section class="products-section">
+            <h2 class="section-title">
+                <span class="gradient-blue-purple">Tous les Casques</span>
+            </h2>
+            <p class="section-subtitle">Notre sélection complète</p>
+            <div class="products-grid" id="grid-casques-all">
+                <!-- Les produits seront chargés ici par JavaScript -->
+            </div>
+        </section>
+        
+        <!-- Pagination -->
+        <div class="pagination" id="pagination-all">
+            <button class="page-btn" disabled data-direction="prev" data-grid-id="grid-casques-all">
+                <i class="fas fa-chevron-left"></i> Précédent
             </button>
-                
-            <button class="page-num-active" data-page="1" data-grid-id="best-sellers-grid">1</button>
-            <button class="page-num" data-page="2" data-grid-id="best-sellers-grid">2</button>
-            <button class="page-num" data-page="3" data-grid-id="best-sellers-grid">3</button>
-                
-            <button class="page-btn" data-direction="next" data-grid-id="best-sellers-grid">
+            <button class="page-num-active" data-page="1" data-grid-id="grid-casques-all">1</button>
+            <button class="page-btn" data-direction="next" data-grid-id="grid-casques-all">
                 Suivant <i class="fas fa-chevron-right"></i>
             </button>
         </div>
-
+        
         <div class="progress-bar-row">
             <hr class="progress-bar-segment-1">
             <hr class="progress-bar-segment-2">
             <hr class="progress-bar-segment-3">
         </div>
-            <div class="products-grid" id="grid-casques-featured"></div>
-        <div class="pagination" id="pagination-promotion">
-            <button class="page-btn" disabled data-direction="prev" data-grid-id="promotion-grid">
-                    <i class="fas fa-chevron-left"></i> Précédent
+        
+        <!-- Section: Produits en vedette -->
+        <section class="products-section">
+            <h2 class="section-title">
+                <span class="gradient-blue-purple">En Vedette</span>
+            </h2>
+            <p class="section-subtitle">Nos meilleures ventes</p>
+            <div class="products-grid" id="grid-casques-featured">
+                <!-- Les produits en vedette seront chargés ici -->
+            </div>
+        </section>
+        
+        <!-- Pagination vedette -->
+        <div class="pagination" id="pagination-featured">
+            <button class="page-btn" disabled data-direction="prev" data-grid-id="grid-casques-featured">
+                <i class="fas fa-chevron-left"></i> Précédent
             </button>
-                
-            <button class="page-num-active" data-page="1" data-grid-id="promotion-grid">1</button>
-            <button class="page-num" data-page="2" data-grid-id="promotion-grid">2</button>
-            <button class="page-num" data-page="3" data-grid-id="promotion-grid">3</button>
-                
-            <button class="page-btn" data-direction="next" data-grid-id="promotion-grid">
+            <button class="page-num-active" data-page="1" data-grid-id="grid-casques-featured">1</button>
+            <button class="page-btn" data-direction="next" data-grid-id="grid-casques-featured">
                 Suivant <i class="fas fa-chevron-right"></i>
             </button>
         </div>
-
-
- 
     </main>
 </body>
 @endsection
