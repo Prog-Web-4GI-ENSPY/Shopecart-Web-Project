@@ -137,6 +137,8 @@ class CategoryController extends Controller
         ], 201);
     }
 
+
+
     /**
      * @OA\Post(
      * path="/api/categories/{category}",
