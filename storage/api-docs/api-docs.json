@@ -12,6 +12,10 @@
         {
             "url": "http://localhost:8000",
             "description": "Serveur de l'API locale"
+        },
+        {
+            "url": "https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud",
+            "description": "Serveur de l'API de Production"
         }
     ],
     "paths": {
