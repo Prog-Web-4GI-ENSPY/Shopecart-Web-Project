@@ -48,7 +48,6 @@ class ProductController extends Controller
      * tags={"Products"},
      * @OA\Parameter(name="search", in="query", @OA\Schema(type="string"), description="Search term for product name/description."),
      * @OA\Parameter(name="category", in="query", @OA\Schema(type="integer"), description="Filter by category ID."),
-     * @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer", default=10), description="Number of products per page."),
      * @OA\Response(
      * response=200,
      * description="Products retrieved successfully",
@@ -89,9 +88,7 @@ class ProductController extends Controller
         $query->orderBy('is_featured', 'desc')
               ->orderBy('updated_at', 'desc');
 
-        // 5. Pagination
-        $perPage = $request->get('per_page', 10);
-        $products = $query->paginate($perPage);
+        $products = $query->get();
         
         // CORRECTION: Utiliser la Resource Collection directement sur l'objet paginé
         return ProductResource::collection($products)
@@ -447,7 +444,6 @@ class ProductController extends Controller
      * summary="Get vendor's products (Minimal Pagination) - Visible to Admin/Vendor",
      * tags={"Products"},
      * security={{"bearerAuth":{}}},
-     * @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer", default=12), description="Number of products per page."),
      * @OA\Response(
      * response=200,
      * description="Vendor's products list",
@@ -482,18 +478,14 @@ class ProductController extends Controller
         // Si vous avez un champ 'vendor_id' dans la table 'products', décommentez la ligne suivante:
         // $productsQuery = Product::where('vendor_id', $user->id);
         
-        $products = Product::orderBy('created_at', 'desc')
-            ->paginate($request->get('per_page', 12));
+        // Utilisation de get()
+     $products = Product::orderBy('created_at', 'desc')->get();
         
             return response()->json([
                 'status' => 'success', // Ajouté
                 'data' => ProductResource::collection($products->items()),
                 'message' => 'Products retrieved successfully', // Ajouté
                 'code' => 200, // Ajouté
-                'total' => $products->total(),
-                'per_page' => $products->perPage(),
-                'current_page' => $products->currentPage(),
-                'last_page' => $products->lastPage(),
             ], 200);
     }
 

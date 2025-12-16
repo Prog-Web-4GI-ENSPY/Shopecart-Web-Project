@@ -2891,15 +2891,6 @@
                         "schema": {
                             "type": "integer"
                         }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Number of products per page.",
-                        "schema": {
-                            "type": "integer",
-                            "default": 10
-                        }
                     }
                 ],
                 "responses": {
@@ -3241,17 +3232,6 @@
                 ],
                 "summary": "Get vendor's products (Minimal Pagination) - Visible to Admin/Vendor",
                 "operationId": "e1caf79623d4afd8e2e296f0c244e580",
-                "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Number of products per page.",
-                        "schema": {
-                            "type": "integer",
-                            "default": 12
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Vendor's products list",
