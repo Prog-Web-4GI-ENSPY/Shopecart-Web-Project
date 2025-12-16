@@ -25,7 +25,6 @@ class CategoryController extends Controller
      * path="/api/categories",
      * summary="Get all categories (Public)",
      * tags={"Categories"},
-     * @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer", default=15)),
      * @OA\Response(
      * response=200,
      * description="List of categories",
@@ -38,15 +37,11 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $categories = Category::orderBy('position', 'asc')
-            ->paginate($request->get('per_page', 15));
+        $categories = Category::orderBy('position', 'asc')->get();
 
         return response()->json([
             'message' => 'Categories retrieved successfully',
             'data' => CategoryResource::collection($categories),
-            'total' => $categories->total(),
-            'per_page' => $categories->perPage(),
-            'current_page' => $categories->currentPage(),
         ]);
     }
 
@@ -271,7 +266,6 @@ class CategoryController extends Controller
      * summary="Get products by category (Public)",
      * tags={"Categories"},
      * @OA\Parameter(name="category", in="path", required=true, @OA\Schema(type="integer")),
-     * @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer", default=15)),
      * @OA\Response(
      * response=200,
      * description="List of products in category",
@@ -289,14 +283,11 @@ class CategoryController extends Controller
             // Assurez-vous que la colonne 'is_visible' existe sur votre modèle Product
             ->where('is_visible', true) 
             ->orderBy('created_at', 'desc')
-            ->paginate($request->get('per_page', 15));
+            ->get();
 
         // Retourne la collection paginée avec la ProductResource
         return ProductResource::collection($products)->additional([
             'message' => 'Products retrieved by category successfully',
-            'total' => $products->total(),
-            'per_page' => $products->perPage(),
-            'current_page' => $products->currentPage(),
         ]);
     }
 }
