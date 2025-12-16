@@ -1,30 +1,22 @@
 // api-service.js
-/**
- * SERVICE API - Communication avec le backend Laravel
- * ===================================================
- */
-
 class ApiService {
     constructor() {
-        this.baseURL = 'http://localhost:8000/api';
+        this.baseURL = 'https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud/api';
         this.token = localStorage.getItem('auth_token');
+        this.categoriesCache = null;
     }
 
-    /**
-     * Méthode de requête standard pour les payloads JSON.
-     */
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
         const config = {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN' :'' 
+                'X-CSRF-TOKEN': ''
             },
             ...options
         };
 
-        // Ajouter le token d'authentification si disponible
         if (this.token) {
             config.headers['Authorization'] = `Bearer ${this.token}`;
         }
@@ -32,8 +24,6 @@ class ApiService {
         try {
             const response = await fetch(url, config);
             
-            console.log("response", response.message)
-            // Gérer les erreurs d'authentification
             if (response.status === 401) {
                 this.handleUnauthorized();
                 throw new Error('Session expirée');
@@ -51,56 +41,220 @@ class ApiService {
         }
     }
 
-    /**
-     * Méthode de requête dédiée pour les payloads multipart/form-data (upload de fichiers).
-     * Retire l'entête 'Content-Type' pour laisser le navigateur la gérer.
-     */
-    async requestMultipart(endpoint, options = {}) { // NOUVELLE MÉTHODE
-        const url = `${this.baseURL}${endpoint}`;
-        
-        // Copie des headers pour omettre explicitement 'Content-Type: application/json'
-        const headers = {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': '' 
-        };
-
-        // Ajouter le token d'authentification si disponible
-        if (this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
-        }
-
-        const config = {
-            headers: headers,
-            ...options // options.body DOIT être un objet FormData
-        };
-
-        try {
-            const response = await fetch(url, config);
-            
-            if (response.status === 401) {
-                this.handleUnauthorized();
-                throw new Error('Session expirée');
-            }
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('API Request (Multipart) failed:', error);
-            throw error;
-        }
-    }
-
     handleUnauthorized() {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user');
         window.location.href = '/login.html';
     }
 
-    // ==================== AUTHENTIFICATION ====================
+    // ==================== MÉTHODES CATÉGORIES ====================
+    
+    /**
+     * Récupère TOUTES les catégories
+     */
+    async getAllCategories() {
+        try {
+            console.log('📥 Récupération de toutes les catégories...');
+            const response = await this.request('/categories');
+            
+            if (response && response.message === "Categories retrieved successfully") {
+                this.categoriesCache = response.data;
+                console.log('reponse',response);
+                console.log(`✅ ${response.data.length} catégories récupérées`);
+                return response.data;
+            }
+            throw new Error('Format de réponse invalide');
+        } catch (error) {
+            console.error('❌ Erreur lors de la récupération des catégories:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Affiche toutes les catégories pour débogage
+     */
+    async debugCategories() {
+        try {
+            const categories = await this.getAllCategories();
+            
+            console.log('📊 === LISTE DES CATÉGORIES ===');
+            categories.forEach(cat => {
+                console.log(`ID: ${cat.id} | Nom: "${cat.name}" | Slug: ${cat.slug}`);
+            });
+            console.log('===============================');
+            
+            return categories;
+        } catch (error) {
+            console.error('Erreur debugCategories:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Cherche une catégorie par son nom (exact ou approchant)
+     */
+    async findCategoryByName(categoryName) {
+        try {
+            console.log(`🔍 Recherche catégorie: "${categoryName}"`);
+            
+            // Récupérer toutes les catégories
+            const allCategories = await this.getAllCategories();
+            
+            if (!allCategories || allCategories.length === 0) {
+                console.error('❌ Aucune catégorie disponible');
+                return null;
+            }
+            
+            const searchLower = categoryName.toLowerCase().trim();
+            
+            // 1. Recherche exacte (insensible à la casse)
+            let category = allCategories.find(cat => 
+                cat.name.toLowerCase() === searchLower
+            );
+            
+            // 2. Recherche par slug
+            if (!category) {
+                category = allCategories.find(cat => 
+                    cat.slug && cat.slug.toLowerCase() === searchLower
+                );
+            }
+            
+            // 3. Recherche partielle
+            if (!category) {
+                category = allCategories.find(cat => 
+                    cat.name.toLowerCase().includes(searchLower) ||
+                    searchLower.includes(cat.name.toLowerCase())
+                );
+            }
+            
+            if (category) {
+                console.log(`✅ Catégorie trouvée: "${category.name}" (ID: ${category.id})`);
+                return category;
+            } else {
+                console.warn(`❌ Catégorie "${categoryName}" non trouvée`);
+                console.log('📋 Catégories disponibles:');
+                allCategories.forEach(cat => {
+                    console.log(`  • "${cat.name}" (ID: ${cat.id})`);
+                });
+                return null;
+            }
+            
+        } catch (error) {
+            console.error('Erreur findCategoryByName:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Récupère l'ID d'une catégorie par son nom
+     */
+    async getCategoryIdByName(categoryName) {
+        const category = await this.findCategoryByName(categoryName);
+        return category ? category.id : null;
+    }
+
+    /**
+     * Récupère les produits d'une catégorie par son ID
+     */
+    async getProductsByCategoryId(categoryId, options = {}) {
+        try {
+            const { page = 1, limit = 12, filters = {} } = options;
+            
+            const params = new URLSearchParams({
+                page: page.toString(),
+                per_page: limit.toString()
+            });
+            
+            // Ajouter les filtres
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    params.append(key, value.toString());
+                }
+            });
+            
+            const endpoint = `/categories/${categoryId}/products?${params.toString()}`;
+            
+            console.log(`📦 Chargement produits - Catégorie ID: ${categoryId}`);
+            
+            const response = await this.request(endpoint);
+            
+            if (response && response.message && response.message.includes("successfully")) {
+                console.log(`✅ ${response.data?.length || 0} produits chargés`);
+                return response;
+            } else {
+                throw new Error(response?.message || 'Réponse API invalide');
+            }
+            
+        } catch (error) {
+            console.error(`❌ Erreur getProductsByCategoryId:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * Méthode complète: nom → catégorie → produits
+     */
+    async getProductsByCategoryName(categoryName, options = {}) {
+        console.log('🚀 Processus complet de chargement');
+        
+        // 1. Trouver la catégorie
+        const category = await this.findCategoryByName(categoryName);
+        if (!category) {
+            throw new Error(`Catégorie "${categoryName}" non trouvée`);
+        }
+        
+        // 2. Charger les produits
+        const productsResponse = await this.getProductsByCategoryId(category.id, options);
+        
+        return {
+            category: category,
+            productsResponse: productsResponse
+        };
+    }
+
+    // ==================== AUTRES MÉTHODES ====================
+    
+    async getProducts() {
+        return await this.request('/products', { method: 'GET' });
+    }
+
+    async getFeaturedProducts() {
+        return await this.request('/products/featured');
+    }
+
+    async getProduct(id) {
+        return await this.request(`/products/${id}`);
+    }
+
+    async addToCart(productId, quantity = 1) {
+        return await this.request(`/cart/add/${productId}`, {
+            method: 'POST',
+            body: JSON.stringify({ quantity })
+        });
+    }
+
+    async getCart() {
+        return await this.request('/cart');
+    }
+
+    async updateCartItem(cartItemId, quantity) {
+        return await this.request(`/cart/items/${cartItemId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ quantity })
+        });
+    }
+
+    async removeCartItem(cartItemId) {
+        return await this.request(`/cart/items/${cartItemId}`, {
+            method: 'DELETE'
+        });
+    }
+
+    async clearCart() {
+        return await this.request('/cart/clear', { method: 'DELETE' });
+    }
+
+    // Authentification
     async register(userData) {
         return await this.request('/register', {
             method: 'POST',
@@ -125,9 +279,7 @@ class ApiService {
 
     async logout() {
         try {
-            await this.request('/logout', {
-                method: 'POST'
-            });
+            await this.request('/logout', { method: 'POST' });
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
@@ -140,215 +292,7 @@ class ApiService {
     async getCurrentUser() {
         return await this.request('/user');
     }
-
-    // ==================== PRODUITS ====================
-    async getProducts() {
-        return await this.request('/products',
-            {
-                method: 'GET'
-            }
-        );
-    }
-
-    async getFeaturedProducts() {
-        return await this.request('/products/featured');
-    }
-
-    async getProduct(id) {
-        return await this.request(`/products/${id}`);
-    }
-
-    async getCategories() {
-        return await this.request('/categories');
-    }
-
-    async getCategory(id) {
-        return await this.request(`/categories/${id}`);
-    }
-
-    // ==================== VARIANTES DE PRODUITS ==================== // NOUVELLE SECTION
-
-    async getProductVariants(productId) {
-        return await this.request(`/products/${productId}/variants`);
-    }
-
-    async getProductVariant(variantId) {
-        return await this.request(`/variants/${variantId}`);
-    }
-
-    /**
-     * Crée une nouvelle variante. 
-     * @param {number} productId 
-     * @param {FormData} variantData - Doit contenir les champs texte et le fichier 'image'.
-     */
-    async createProductVariant(productId, variantData) {
-        return await this.requestMultipart(`/products/${productId}/variants`, {
-            method: 'POST',
-            body: variantData 
-        });
-    }
-
-    /**
-     * Met à jour une variante existante (gère l'upload de fichiers).
-     * @param {number} variantId 
-     * @param {FormData} variantData - Doit contenir les champs à mettre à jour et optionnellement le fichier 'image'.
-     */
-    async updateProductVariant(variantId, variantData) {
-        // Ajoute le champ _method=PUT requis par Laravel pour gérer le PUT avec des fichiers
-        if (variantData instanceof FormData) {
-            variantData.append('_method', 'PUT'); 
-        }
-        
-        // Utilise POST avec _method=PUT
-        return await this.requestMultipart(`/variants/${variantId}`, {
-            method: 'POST',
-            body: variantData
-        });
-    }
-
-    async deleteProductVariant(variantId) {
-        return await this.request(`/variants/${variantId}`, {
-            method: 'DELETE'
-        });
-    }
-
-    // ==================== PANIER ====================
-    async getCart() {
-        return await this.request('/cart');
-    }
-
-    async addToCart(productId, quantity = 1) {
-        return await this.request(`/cart/add/${productId}`, {
-            method: 'POST',
-            body: JSON.stringify({ quantity })
-        });
-    }
-
-    async updateCartItem(cartItemId, quantity) {
-        return await this.request(`/cart/items/${cartItemId}`, {
-            method: 'PUT',
-            body: JSON.stringify({ quantity })
-        });
-    }
-
-    async removeCartItem(cartItemId) {
-        return await this.request(`/cart/items/${cartItemId}`, {
-            method: 'DELETE'
-        });
-    }
-
-    async clearCart() {
-        return await this.request('/cart/clear', {
-            method: 'DELETE'
-        });
-    }
-
-    // Méthodes alternatives pour cartItems
-    async getCartItems(cartId) {
-        return await this.request(`/cartItems/cart/${cartId}`);
-    }
-
-    async addCartItem(itemData) {
-        return await this.request('/cartItems', {
-            method: 'POST',
-            body: JSON.stringify(itemData)
-        });
-    }
-
-    async updateCartItemAlt(cartItemId, itemData) {
-        return await this.request(`/cartItems/${cartItemId}`, {
-            method: 'PUT',
-            body: JSON.stringify(itemData)
-        });
-    }
-
-    async deleteCartItemAlt(cartItemId) {
-        return await this.request(`/cartItems/${cartItemId}`, {
-            method: 'DELETE'
-        });
-    }
-
-    // ==================== COMMANDES ====================
-    async getOrders() {
-        return await this.request('/orders');
-    }
-
-    async createOrder(orderData) {
-        return await this.request('/orders', {
-            method: 'POST',
-            body: JSON.stringify(orderData)
-        });
-    }
-
-    async getOrder(orderId) {
-        return await this.request(`/orders/${orderId}`);
-    }
-
-    // ==================== PAIEMENT ====================
-    async createPaymentIntent(orderId, paymentData) {
-        return await this.request(`/payment/create-payment-intent/order/${orderId}`, {
-            method: 'POST',
-            body: JSON.stringify(paymentData)
-        });
-    }
-
-    async registerPayment(paymentData) {
-        return await this.request('/payment/registerPayment', {
-            method: 'POST',
-            body: JSON.stringify(paymentData)
-        });
-    }
 }
 
 // Instance globale
 window.apiService = new ApiService();
-
-// Test get products
-
-/**
- * Exemple de fonction pour charger les produits au démarrage d'une page
- */
-
-async function loadProducts() {
-    try {
-        const response = await window.apiService.getProducts();
-
-        console.log("Réponse de l'API :", response);
-
-        // --- CORRECTION DE LA LOGIQUE ICI ---
-        if (response && response.status === 'success') {
-            const products = response.data;
-            console.log("Liste des produits :", products);
-            
-            // Logique pour afficher les produits
-            // displayProducts(products); 
-
-        } else {
-            // Seules les réponses d'API qui ne sont PAS "success" sont traitées comme des erreurs de logique
-            console.error("Erreur lors de la récupération des produits:", response ? response.message : "Réponse inattendue");
-        }
-
-    } catch (error) {
-        // Ceci gère uniquement les erreurs HTTP (404, 500, etc.) ou réseau
-        console.error("Une erreur s'est produite lors de la requête API:", error);
-    }
-}
-// Appeler la fonction
-loadProducts();
-
-// Récupérer les produits vedettes (Featured)
-async function loadFeaturedProducts() {
-    try {
-        const response = await window.apiService.getFeaturedProducts();
-        
-        if (response.status === 'success') {
-            const featuredProducts = response.data;
-            console.log("Produits en vedette :", featuredProducts);
-        }
-
-    } catch (error) {
-        console.error("Erreur lors de la récupération des produits vedettes:", error);
-    }
-}
-
-loadFeaturedProducts();
