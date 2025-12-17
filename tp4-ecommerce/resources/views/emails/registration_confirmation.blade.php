@@ -1,17 +1,16 @@
-@component('mail::message')
+<x-mail::message>
+# Bienvenue chez ShopCart, {{ $name }} !
 
-Bienvenue chez Shopecart, {{ $name }} !
+Merci de vous être inscrit sur notre plateforme. Nous sommes ravis de vous accueillir.
 
-Merci de vous être inscrit(e) sur notre plateforme. Nous sommes ravis de vous compter parmi nous.
+Votre compte est prêt à être utilisé. Vous pouvez commencer à explorer nos produits.
 
-Vous êtes maintenant prêt(e) à explorer notre vaste catalogue et à passer votre première commande.
+<x-mail::button :url="url('/login')">
+Accéder à mon compte
+</x-mail::button>
 
-@component('mail::button', ['url' => url('/login')])
-Commencer les achats
-@endcomponent
+Si vous avez des questions, n'hésitez pas à nous contacter.
 
-Si vous rencontrez des problèmes, n'hésitez pas à nous contacter en répondant à cet e-mail.
-
-Merci,
-L'équipe Shopecart
-@endcomponent
+Cordialement,
+L'équipe ShopCart
+</x-mail::message>

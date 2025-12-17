@@ -8,7 +8,16 @@ return [
                 // MODIFICATION : Titre de l'API mis à jour
                 'title' => 'Shopecart E-commerce API',
             ],
-
+            
+            'servers' => [
+                [
+                    // Cela lit APP_URL du .env (ou la valeur par défaut locale)
+                    'url' => env('APP_URL', 'https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud') . '/api', 
+                    // Pour votre environnement de production sur Laravel Cloud : 
+                    // url sera: https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud/api
+                    'description' => 'Current API Server (' . env('APP_ENV') . ')',
+                ],
+            ],
             'routes' => [
                 /*
                  * Route for accessing api documentation interface

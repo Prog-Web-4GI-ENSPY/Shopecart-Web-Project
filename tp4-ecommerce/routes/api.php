@@ -46,7 +46,7 @@ Route::get('products/{slug}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/categories/{category}/products', [CategoryController::class, 'products']);
-
+Route::post('/categories/{category}', [CategoryController::class, 'update']);
 Route::get('/products/{product}/variants', [ProductVariantController::class, 'index']);
 
 

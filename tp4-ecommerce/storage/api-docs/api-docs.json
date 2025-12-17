@@ -12,6 +12,10 @@
         {
             "url": "http://localhost:8000",
             "description": "Serveur de l'API locale"
+        },
+        {
+            "url": "https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud",
+            "description": "Serveur de l'API de Production"
         }
     ],
     "paths": {
@@ -2114,16 +2118,6 @@
                 ],
                 "summary": "Get all categories (Public)",
                 "operationId": "3f5817a34833d0a1f4af4548dd3aeaba",
-                "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "List of categories",
@@ -2360,14 +2354,6 @@
                         "required": true,
                         "schema": {
                             "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
                         }
                     }
                 ],
@@ -2909,15 +2895,6 @@
                         "schema": {
                             "type": "integer"
                         }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Number of products per page.",
-                        "schema": {
-                            "type": "integer",
-                            "default": 10
-                        }
                     }
                 ],
                 "responses": {
@@ -3259,17 +3236,6 @@
                 ],
                 "summary": "Get vendor's products (Minimal Pagination) - Visible to Admin/Vendor",
                 "operationId": "e1caf79623d4afd8e2e296f0c244e580",
-                "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Number of products per page.",
-                        "schema": {
-                            "type": "integer",
-                            "default": 12
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Vendor's products list",
