@@ -62,7 +62,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with(['variants', 'category']);
+        $query = Product::with(['variants']);
         
         // 1. Filtrage par Visibilité
         $query->where('is_visible', true);
@@ -131,7 +131,7 @@ class ProductController extends Controller
     {
         try {
             // Récupère le produit visible par le slug
-            $product = Product::with(['variants', 'category']) // Ajouté ici
+            $product = Product::with(['variants']) // Ajouté ici
                 ->where('slug', $slug)
                 ->where('is_visible', true)
                 ->firstOrFail();

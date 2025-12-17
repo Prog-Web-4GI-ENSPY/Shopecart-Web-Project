@@ -5,7 +5,6 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\VariantResource;
-use App\Http\Resources\CategoryResource;
 class ProductResource extends JsonResource
 {
     /**
@@ -28,8 +27,7 @@ class ProductResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             // Ajout des variantes ici
-            'variants' => VariantResource::collection($this->whenLoaded('variants')),
-            'category' => new CategoryResource($this->whenLoaded('category')),
+            'variants' => VariantResource::collection($this->whenLoaded('variants'))
         ];
     }
 }
