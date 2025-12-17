@@ -48,13 +48,12 @@ class OrderController extends Controller
         try{
             $orders = Order::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get();
 
        if ($orders->isEmpty()){
                 return response()->json([
                     'message' => 'No orders found for this user.',
                     'data' => [],
-                    'total' => 0
                 ], 200);
             }
             
@@ -62,9 +61,6 @@ class OrderController extends Controller
             return response()->json([
                 'message' => 'Orders retrieved successfully',
                 'data' => OrderResource::collection($orders->items()),
-                'total' => $orders->total(),
-                'per_page' => $orders->perPage(),
-                'current_page' => $orders->currentPage(),
             ], 200);
 
         }
@@ -202,26 +198,28 @@ class OrderController extends Controller
             ]);
            
            // --- 4. Transfert des articles et mise à jour des stocks ---
-            foreach ($cart->items as $cartItem) {
-                $stockSource = $cartItem->productVariant ?? $cartItem->product;
-                
-                // Création de l'article de commande
-                $order->items()->create([
-                    // Utiliser product_id (du produit parent) et potentiellement product_variant_id
-                    'product_id' => $cartItem->product_id, 
-                    'product_variant_id' => $cartItem->product_variant_id, // Ajouter la variante ID dans l'Order Item
-                    'quantity' => $cartItem->quantity,
-                    'unit_price' => $cartItem->unit_price,
-                    'total' => $cartItem->total,
-                    // Utiliser le nom et le SKU de la source de stock (variante ou produit)
-                    'product_name' => $stockSource->name, 
-                    'product_sku' => $stockSource->sku,
-                ]);
-
-                // Décrémentation du stock sur l'objet source (qui est garanti non null)
-                $stockSource->decrement('stock', $cartItem->quantity);
+           foreach ($cart->items as $cartItem) {
+            $stockSource = $cartItem->productVariant ?? $cartItem->product;
+            
+            // Sécurité pour récupérer le product_id si l'item du panier ne l'a pas
+            // mais que la variante l'a.
+            $finalProductId = $cartItem->product_id;
+            if (!$finalProductId && $cartItem->productVariant) {
+                $finalProductId = $cartItem->productVariant->product_id;
             }
-          
+        
+            $order->items()->create([
+                'product_id' => $finalProductId, // On utilise l'ID sécurisé
+                'product_variant_id' => $cartItem->product_variant_id,
+                'quantity' => $cartItem->quantity,
+                'unit_price' => $cartItem->unit_price,
+                'total' => $cartItem->total,
+                'product_name' => $stockSource->name, 
+                'product_sku' => $stockSource->sku,
+            ]);
+        
+            $stockSource->decrement('stock', $cartItem->quantity);
+        }
           // --- 5. Nettoyage du panier ---
             $cart->items()->delete();
             $this->updateCartTotals($cart); // Met à jour les totaux du panier à zéro
@@ -427,8 +425,8 @@ class OrderController extends Controller
             $query->where('status', $request->query('status'));
         }
 
-        // Récupération et pagination des commandes
-        $orders = $query->paginate(15); 
+        // Récupération  des commandes
+        $orders = $query->get(); 
 
         return OrderResource::collection($orders);
     }
