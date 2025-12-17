@@ -85,7 +85,8 @@ class Product extends Model
      */
     public function variants()
     {
-        return $this->hasMany(ProductVariant::class);
+        // Il est impératif de préciser 'productId' ici car votre DB n'utilise pas le standard 'product_id'
+        return $this->hasMany(ProductVariant::class, 'productId');
     }
 
     /**

@@ -480,11 +480,11 @@ class ProductController extends Controller
         // $productsQuery = Product::where('vendor_id', $user->id);
         
         // Utilisation de get()
-     $products = Product::orderBy('created_at', 'desc')->get();
+        $products = Product::with(['variants'])->orderBy('created_at', 'desc')->get();
         
             return response()->json([
                 'status' => 'success', // Ajouté
-                'data' => ProductResource::collection($products->items()),
+               'data' => ProductResource::collection($products),
                 'message' => 'Products retrieved successfully', // Ajouté
                 'code' => 200, // Ajouté
             ], 200);

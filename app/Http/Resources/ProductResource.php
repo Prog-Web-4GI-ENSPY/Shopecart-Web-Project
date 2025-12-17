@@ -27,7 +27,7 @@ class ProductResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             // Ajout des variantes ici
-            'variants' => VariantResource::collection($this->whenLoaded('variants'))
+            'variants' => VariantResource::collection($this->whenLoaded('variants')),
         ];
     }
 }
