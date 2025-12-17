@@ -6,7 +6,7 @@
 
 class ApiService {
     constructor() {
-        this.baseURL = 'http://localhost:8000/api';
+        this.baseURL = 'https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud/api';
         this.token = localStorage.getItem('auth_token');
     }
 
