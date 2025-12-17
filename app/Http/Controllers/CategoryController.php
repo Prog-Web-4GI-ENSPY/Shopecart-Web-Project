@@ -280,16 +280,17 @@ class CategoryController extends Controller
      */
     public function products(Category $category, Request $request)
     {
-        // Récupérer uniquement les produits visibles pour le public
+        // On ajoute with(['variants']) ici pour éviter le crash dans ProductResource
         $products = $category->products()
-            // Assurez-vous que la colonne 'is_visible' existe sur votre modèle Product
+            ->with(['variants']) 
             ->where('is_visible', true) 
             ->orderBy('created_at', 'desc')
             ->get();
-
-        // Retourne la collection paginée avec la ProductResource
+    
         return ProductResource::collection($products)->additional([
             'message' => 'Products retrieved by category successfully',
+            'status' => 'success',
+            'code' => 200
         ]);
     }
 }
