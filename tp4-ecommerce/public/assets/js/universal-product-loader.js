@@ -5,7 +5,7 @@ class UniversalProductLoader {
         this.currentCategory = null;
         this.config = {
             productsPerPage: 8,
-            defaultImage: 'https://via.placeholder.com/300x200?text=Produit'
+            defaultImage: 'https://placehold.co/300x200'
         };
         this.gridConfig = null;
         this.isInitialized = false;
@@ -332,7 +332,7 @@ createProductCard(product) {
     const oldPrice = product.old_price ? this.formatPrice(product.old_price) : null;
     const discount = product.discount_percent || 0;
     const rating = product.rating || 0;
-    const inStock = product.stock_quantity > 0;
+    const inStock = product.stock > 0;
     const imageUrl = product.image_url || product.image || this.config.defaultImage;
     const productUrl = `/products/${product.id}`; // URL du détail
 
