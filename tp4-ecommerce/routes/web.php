@@ -56,3 +56,9 @@ Route::view('/product_disk-detail', 'pages.product_disk-detail')->name('disk_det
 Route::view('/product_cam_details', 'pages.product_cam_details')->name('cam_details');
 Route::view('/product_tel_details', 'pages.product_tel_details')->name('tel_details');
 
+// routes/web.php
+Route::view('/product_casqueDetail/{id}','pages.product_casqueDetail')->name('product.detail');
+// routes/web.php
+Route::get('/products/{id}', function ($id) {
+    return view('pages.product_casqueDetail', ['productId' => $id]);
+})->name('product.detail');

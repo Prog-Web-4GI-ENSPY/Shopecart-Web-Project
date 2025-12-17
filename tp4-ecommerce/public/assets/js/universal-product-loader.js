@@ -322,74 +322,72 @@ class UniversalProductLoader {
     /**
      * Crée une carte produit
      */
-    createProductCard(product) {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.dataset.productId = product.id;
-        
-        // Formater les données
-        const price = this.formatPrice(product.price);
-        const oldPrice = product.old_price ? this.formatPrice(product.old_price) : null;
-        const discount = product.discount_percent || 0;
-        const rating = product.rating || 0;
-        const inStock = product.stock_quantity > 0;
-        const imageUrl = product.image_url || product.image || this.config.defaultImage;
-        const productUrl = `/products/${product.id}`;
+createProductCard(product) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.dataset.productId = product.id;
+    
+    // Formater les données
+    const price = this.formatPrice(product.price);
+    const oldPrice = product.old_price ? this.formatPrice(product.old_price) : null;
+    const discount = product.discount_percent || 0;
+    const rating = product.rating || 0;
+    const inStock = product.stock_quantity > 0;
+    const imageUrl = product.image_url || product.image || this.config.defaultImage;
+    const productUrl = `/products/${product.id}`; // URL du détail
 
-        // Déterminer le tag
-        let tagHtml = '';
-        if (discount > 0) {
-            tagHtml = `<div class="product-tag tag-promo">-${discount}%</div>`;
-        } else if (product.is_featured) {
-            tagHtml = `<div class="product-tag tag-best-seller">TOP VENTE</div>`;
-        } else if (product.is_new) {
-            tagHtml = `<div class="product-tag tag-new">NOUVEAU</div>`;
-        } else if (product.is_premium) {
-            tagHtml = `<div class="product-tag tag-premium">PREMIUM</div>`;
-        }
-        
-        card.innerHTML = `
-            <a href="${productUrl}" class="product-card-link" style="text-decoration: none; color: inherit;">
-                <div class="product-image-wrapper">
-                    <img src="${imageUrl}" alt="${product.name}" class="product-image" 
-                         onerror="this.src='${this.config.defaultImage}'">
-                    ${tagHtml}
-                </div>
-                
-                <div class="product-info">
-                    <p class="product-brand">${product.brand || product.manufacturer || 'Marque'}</p>
-                    <h3 class="product-title-card">${this.truncateText(product.name, 50)}</h3>
-                    
-                    <div class="rating-info">
-                        <div class="stars-list">${this.createStars(rating)}</div>
-                        <span class="rating-text">(${rating.toFixed(1)})</span>
-                    </div>
-                    
-                    <div class="product-actions">
-                        <div class="price-info">
-                            ${oldPrice ? `<span class="old-price" style="text-decoration: line-through; color: #999; font-size: 14px;">${oldPrice}</span>` : ''}
-                            <span class="product-price" style="font-size: 18px; font-weight: bold; color: #333;">${price}</span>
-                        </div>
-                        <button class="add-to-cart-btn" data-product-id="${product.id}" ${!inStock ? 'disabled' : ''}
-                                style="padding: 15px; background: white; border: 2px solid #1e3a8a; border-radius: 50%; 
-                                       cursor: pointer; color: #1e3a8a; font-weight: 600;">
-                            <i class="fas fa-shopping-cart"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="product-stock ${inStock ? 'in-stock' : 'out-of-stock'}" 
-                         style="font-size: 0.875rem; padding: 0.5rem; border-radius: 0.25rem; margin-top: 0.5rem; 
-                                display: flex; align-items: center; gap: 0.5rem;
-                                ${inStock ? 'background-color: #dcfce7; color: #059669;' : 'background-color: #fee2e2; color: #dc2626;'}">
-                        <i class="fas ${inStock ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                        ${inStock ? 'En stock' : 'Rupture de stock'}
-                    </div>
-                </div>
-            </a>
-        `;
-        
-        return card;
+    // Déterminer le tag
+    let tagHtml = '';
+    if (discount > 0) {
+        tagHtml = `<div class="product-tag tag-promo">-${discount}%</div>`;
+    } else if (product.is_featured) {
+        tagHtml = `<div class="product-tag tag-best-seller">TOP VENTE</div>`;
+    } else if (product.is_new) {
+        tagHtml = `<div class="product-tag tag-new">NOUVEAU</div>`;
     }
+    
+    // CORRECTION : Ne pas mettre tout dans un seul lien
+   card.innerHTML = `
+        <div class="product-image-wrapper">
+            <a href="${productUrl}" class="product-image-link">
+                <img src="${imageUrl}" alt="${product.name}" class="product-image" 
+                     onerror="this.src='${this.config.defaultImage}'">
+            </a>
+            ${tagHtml}
+        </div>
+        
+        <div class="product-info">
+            <a href="${productUrl}" class="product-title-link">
+                <p class="product-brand">${product.brand || 'Marque'}</p>
+                <h3 class="product-title-card">${this.truncateText(product.name, 50)}</h3>
+            </a>
+            
+            <div class="rating-info">
+                <div class="stars-list">${this.createStars(rating)}</div>
+                <span class="rating-text">(${rating.toFixed(1)})</span>
+            </div>
+            
+            <div class="product-actions">
+                <div class="price-info">
+                    ${oldPrice ? `<span class="old-price">${oldPrice}</span>` : ''}
+                    <span class="product-price">${price}</span>
+                </div>
+                <button class="add-to-cart-btn" data-product-id="${product.id}" 
+                        ${!inStock ? 'disabled' : ''}
+                        title="${!inStock ? 'Rupture de stock' : 'Ajouter au panier'}">
+                    <i class="fas fa-shopping-cart"></i>
+                </button>
+            </div>
+            
+            <div class="product-stock ${inStock ? 'in-stock' : 'out-of-stock'}">
+                <i class="fas ${inStock ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                ${inStock ? 'En stock' : 'Rupture de stock'}
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
 
     /**
      * Affiche un message "pas de produits"
@@ -415,12 +413,50 @@ class UniversalProductLoader {
      * Initialise les événements
      */
     initEventListeners() {
-        document.addEventListener('click', (e) => {
-            // Ajouter au panier
-            if (e.target.closest('.add-to-cart-btn')) {
-                const btn = e.target.closest('.add-to-cart-btn');
-                const productId = btn.dataset.productId;
-                this.addToCart(productId);
+        // Gestion du clic sur les boutons "ajouter au panier"
+        document.addEventListener('click', async (e) => {
+            const addToCartBtn = e.target.closest('.add-to-cart-btn');
+            
+            if (addToCartBtn && !addToCartBtn.disabled) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const productId = addToCartBtn.dataset.productId;
+                
+                // Animation visuelle
+                addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                addToCartBtn.disabled = true;
+                
+                try {
+                    await this.addToCart(productId);
+                    
+                    // Animation de succès
+                    addToCartBtn.innerHTML = '<i class="fas fa-check"></i>';
+                    addToCartBtn.style.backgroundColor = '#10b981';
+                    addToCartBtn.style.borderColor = '#10b981';
+                    
+                    setTimeout(() => {
+                        addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+                        addToCartBtn.style.backgroundColor = '';
+                        addToCartBtn.style.borderColor = '';
+                        addToCartBtn.disabled = false;
+                    }, 1500);
+                    
+                } catch (error) {
+                    // Animation d'erreur
+                    addToCartBtn.innerHTML = '<i class="fas fa-exclamation"></i>';
+                    addToCartBtn.style.backgroundColor = '#ef4444';
+                    addToCartBtn.style.borderColor = '#ef4444';
+                    
+                    setTimeout(() => {
+                        addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+                        addToCartBtn.style.backgroundColor = '';
+                        addToCartBtn.style.borderColor = '';
+                        addToCartBtn.disabled = false;
+                    }, 1500);
+                    
+                    console.error('Erreur ajout panier:', error);
+                }
             }
         });
     }
@@ -500,14 +536,19 @@ class UniversalProductLoader {
     /**
      * Actions
      */
-    async addToCart(productId) {
-        try {
+   async addToCart(productId) {
+    try {
+        if (window.cartManager) {
+            await window.cartManager.addToCart(productId, 1);
+        } else {
+            // Fallback à l'API directe
             await this.api.addToCart(productId, 1);
             this.showNotification('Produit ajouté au panier', 'success');
-        } catch (error) {
-            this.showNotification('Erreur: ' + error.message, 'error');
         }
+    } catch (error) {
+        this.showNotification('Erreur: ' + error.message, 'error');
     }
+}
 
     viewProduct(productId) {
         window.location.href = `/products/${productId}`;

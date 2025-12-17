@@ -18,19 +18,13 @@
     <script src="{{ asset('assets/js/cart-manager.js') }}" defer></script>
     
     <!-- Script d'initialisation -->
-    <script>
+     <script>
     document.addEventListener('DOMContentLoaded', async function() {
         console.log('🚀 Initialisation de la page produits...');
         
-        // Attendre que l'API soit prête
-        await new Promise(resolve => {
-            const checkApi = setInterval(() => {
-                if (window.apiService) {
-                    clearInterval(checkApi);
-                    resolve();
-                }
-            }, 100);
-        });
+        // Attendre que les services soient prêts
+        await waitForService('apiService');
+        await waitForService('productLoader');
         
         // Configuration des grilles
         const gridConfig = {
@@ -38,8 +32,8 @@
             featured: '#grid-casques-featured'
         };
         
-        // Essayer différentes catégories
-        const categoryNames = ['Électronique', 'Casques audio', 'Audio', 'Casques', 'Informatique'];
+        // Catégories à essayer
+        const categoryNames = ['Électronique', 'Casques audio', 'Audio', 'Casques'];
         
         let loaded = false;
         
@@ -49,24 +43,20 @@
             try {
                 console.log(`🔄 Tentative avec la catégorie: "${categoryName}"`);
                 
-                // Vérifier si cette catégorie existe
                 const category = await window.apiService.findCategoryByName(categoryName);
                 
                 if (category) {
                     console.log(`✅ Catégorie trouvée: "${category.name}" (ID: ${category.id})`);
                     
-                    // Initialiser le chargeur
-                    if (window.productLoader) {
-                        await window.productLoader.init(category.name, gridConfig, {
-                            productsPerPage: 8
-                        });
-                        
-                        loaded = true;
-                        console.log(`✅ Chargement réussi avec "${category.name}"`);
-                        break;
-                    }
-                } else {
-                    console.log(`⚠️ Catégorie "${categoryName}" non trouvée`);
+                    // Initialiser le chargeur de produits
+                    await window.productLoader.init(category.name, gridConfig, {
+                        productsPerPage: 8,
+                        defaultImage: '/assets/images/placeholder.jpg'
+                    });
+                    
+                    loaded = true;
+                    console.log(`✅ Chargement réussi avec "${category.name}"`);
+                    break;
                 }
                 
             } catch (error) {
@@ -77,36 +67,69 @@
         
         if (!loaded) {
             console.error('❌ Aucune catégorie valide trouvée');
-            
-            // Afficher un message d'erreur
-            const errorDiv = document.createElement('div');
-            errorDiv.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                    <i class="fas fa-exclamation-triangle fa-3x" style="color: #dc2626; margin-bottom: 20px;"></i>
-                    <h3 style="color: #374151; margin-bottom: 10px;">Erreur de chargement</h3>
-                    <p style="color: #6b7280; margin-bottom: 20px;">
-                        Impossible de charger les produits. Veuillez réessayer plus tard.
-                    </p>
-                    <button onclick="location.reload()" style="background-color: #1e40af; color: white; 
-                            border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                        <i class="fas fa-redo"></i> Réessayer
-                    </button>
-                </div>
-            `;
-            
-            const grid = document.querySelector('#grid-casques-all');
-            if (grid) {
-                grid.innerHTML = '';
-                grid.appendChild(errorDiv);
-            }
+            showErrorMessage('grid-casques-all');
+            showErrorMessage('grid-casques-featured');
         }
         
-        // Initialiser les autres fonctionnalités
-        setTimeout(() => {
-            if (typeof initFilters === 'function') initFilters();
-            if (typeof initPagination === 'function') initPagination();
-        }, 1000);
+        // Initialiser les filtres
+        initFilters();
     });
+
+    // Fonction d'attente pour les services
+    function waitForService(serviceName) {
+        return new Promise(resolve => {
+            const checkService = setInterval(() => {
+                if (window[serviceName]) {
+                    clearInterval(checkService);
+                    resolve();
+                }
+            }, 100);
+        });
+    }
+
+    // Fonction pour afficher les erreurs
+    function showErrorMessage(gridId) {
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                <i class="fas fa-exclamation-triangle fa-3x" style="color: #dc2626; margin-bottom: 20px;"></i>
+                <h3 style="color: #374151; margin-bottom: 10px;">Erreur de chargement</h3>
+                <p style="color: #6b7280; margin-bottom: 20px;">
+                    Impossible de charger les produits. Veuillez réessayer plus tard.
+                </p>
+                <button onclick="location.reload()" 
+                        style="background: #1e40af; color: white; border: none; 
+                            padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-redo"></i> Réessayer
+                </button>
+            </div>
+        `;
+    }
+
+    // Initialisation des filtres
+    function initFilters() {
+        console.log('🎛️ Initialisation des filtres...');
+        
+        const filterButtons = document.querySelectorAll('.dropdown-content a');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Filtre cliqué:', this.dataset);
+                // Implémentez la logique de filtrage ici
+            });
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+    // Gérer les clics sur les liens de produit
+    const productLink = e.target.closest('.product-title-link, .product-image-link');
+    if (productLink && productLink.href) {
+        e.preventDefault();
+        window.location.href = productLink.href;
+    }
+});
     </script>
 </head>
 @extends('layouts.app')

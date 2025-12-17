@@ -1845,3 +1845,240 @@ body {
 .product-card:nth-child(6) { animation-delay: 0.6s; }
 .product-card:nth-child(7) { animation-delay: 0.7s; }
 .product-card:nth-child(8) { animation-delay: 0.8s; }
+
+/* assets/css/products_casque.css */
+/* Style des cartes produit */
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.product-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.product-image-wrapper {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.product-image-link {
+    display: block;
+    height: 100%;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.05);
+}
+
+.product-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    z-index: 2;
+}
+
+.tag-promo {
+    background: #ef4444;
+}
+
+.tag-best-seller {
+    background: #f59e0b;
+}
+
+.tag-new {
+    background: #10b981;
+}
+
+.product-info {
+    padding: 1.25rem;
+}
+
+.product-title-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.product-title-link:hover .product-title-card {
+    color: #1e40af;
+}
+
+.product-brand {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0 0 0.25rem 0;
+}
+
+.product-title-card {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.3;
+    transition: color 0.2s;
+}
+
+.rating-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.stars-list {
+    color: #fbbf24;
+    font-size: 0.875rem;
+}
+
+.rating-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.product-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.price-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.product-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.add-to-cart-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #1e3a8a;
+    color: #1e3a8a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 1.125rem;
+}
+
+.add-to-cart-btn:hover:not(:disabled) {
+    background: #1e3a8a;
+    color: white;
+    transform: scale(1.1);
+}
+
+.add-to-cart-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #9ca3af;
+    color: #9ca3af;
+}
+
+.product-stock {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.product-stock.in-stock {
+    background-color: #dcfce7;
+    color: #059669;
+}
+
+.product-stock.out-of-stock {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Ajouter à products_casque.css */
+.product-image-link, 
+.product-title-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: opacity 0.2s;
+}
+
+.product-image-link:hover {
+    opacity: 0.9;
+}
+
+.product-title-link:hover .product-title-card {
+    color: #1e40af;
+}
+
+/* Style pour les boutons add-to-cart */
+.add-to-cart-btn {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-to-cart-btn:not(:disabled):hover {
+    background: #1e3a8a;
+    color: white;
+    transform: scale(1.1);
+}
+
+.add-to-cart-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
