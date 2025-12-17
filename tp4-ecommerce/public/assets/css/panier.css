@@ -28,7 +28,6 @@ body {
 /* Forcer le main à prendre l'espace restant et ajouter padding pour le header fixe */
 main {
     flex: 1; /* Prend tout l'espace disponible entre header et footer */
-    margin-top: 120px; /* Espace pour le header fixe (ajusté pour couvrir la hauteur du header + bordure) */
     position: relative; /* Assure que le main reste sous le header */
     z-index: 1; /* S'assure que le main est sous le header (z-index: 1000) */
 }

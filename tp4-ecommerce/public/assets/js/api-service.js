@@ -327,8 +327,20 @@ class ApiService {
     async removeCartItem(itemId) {
         return await this.request(`/cart/remove/${itemId}`, { method: 'DELETE' });
     }
+
+
 }
 
-
+window.handleCheckout = function() {
+    console.log("🚀 Redirection vers la page de commande...");
+    // Si l'utilisateur n'est pas connecté, on le redirige vers login
+    if (!window.apiService.token) {
+        alert("Veuillez vous connecter pour passer commande.");
+        window.location.href = '/login';
+        return;
+    }
+    // Sinon direction checkout
+    window.location.href = '/checkout';
+};
 // Instance globale
 window.apiService = new ApiService();
