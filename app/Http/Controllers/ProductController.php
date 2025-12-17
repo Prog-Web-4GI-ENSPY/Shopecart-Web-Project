@@ -62,7 +62,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::query();
+        $query = Product::with(['variants', 'category']);
         
         // 1. Filtrage par Visibilité
         $query->where('is_visible', true);
@@ -131,7 +131,8 @@ class ProductController extends Controller
     {
         try {
             // Récupère le produit visible par le slug
-            $product = Product::where('slug', $slug)
+            $product = Product::with(['variants', 'category']) // Ajouté ici
+                ->where('slug', $slug)
                 ->where('is_visible', true)
                 ->firstOrFail();
 
@@ -575,11 +576,12 @@ class ProductController extends Controller
         $limit = $request->get('limit', 8); 
         
         try {
-            $products = Product::where('is_visible', true)
-                               ->where('is_featured', true)
-                               ->orderBy('updated_at', 'desc')
-                               ->take($limit)
-                               ->get();
+            $products = Product::with('variants') // Ajouté ici
+                    ->where('is_visible', true)
+                    ->where('is_featured', true)
+                    ->orderBy('updated_at', 'desc')
+                    ->take($limit)
+                    ->get();
 
             return response()->json([
                 'status' => 'success',
