@@ -11,9 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script defer src="{{ asset('assets/js/newsletter.js') }}"></script>
    <script src="{{ asset('assets/js/about.js') }}"> </script>
-  <script src="{{ asset('assets/js/header.js') }}"></script>
 </head>
 
 @extends('layouts.app')
@@ -272,7 +270,7 @@
         <div class="container">
             <h2>Rejoignez des Milliers de Clients Satisfaits</h2>
             <p>Découvrez notre sélection de produits électroniques de qualité</p>
-            <a href="{{ route('catalogue') }}" class="cta-button">Voir nos Produits</a>
+            <a href="{{ route('casque') }}" class="cta-button">Voir nos Produits</a>
         </div>
     </section>
     

@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title> Gamming| Shopcart</title> 
+    <title> Telephones| Shopcart</title> 
     
     <!-- Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -175,7 +175,7 @@
         <!-- Section: Tous les produits -->
         <section class="products-section">
             <h2 class="section-title">
-                <span class="gradient-blue-purple">Tous les accessoire Gamming</span>
+                <span class="gradient-blue-purple">Tous les Telephones</span>
             </h2>
             <p class="section-subtitle">Notre sélection complète</p>
             <div class="products-grid" id="grid-casques-all">
@@ -237,7 +237,7 @@
         };
         
         // Catégories à essayer
-        const categoryNames = ['Manettes'];
+        const categoryNames = ['Téléphones portables'];
         
         let loaded = false;
         

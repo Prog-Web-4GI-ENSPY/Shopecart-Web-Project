@@ -37,13 +37,16 @@ Route::view('/blog/article3', 'articles.article3')->name('article3');
 Route::view('/blog/article4', 'articles.article4')->name('article4');
 Route::view('/blog/article5', 'articles.article5')->name('article5');
 Route::view('/blog/article6', 'articles.article6')->name('article6');
-Route::view('/products_ordi','pages.products_ordi')->name('ordi');
-Route::view('/products_tel','pages.products_tel')->name('tel');
-Route::view('/product_casque','pages.product_casque')->name('casque');
-Route::view('/product_catalogue','pages.product_catalogue')->name('catalogue');
-Route::view('/products_disk','pages.products_disk')->name('disk');
-Route::view('/products_manettes','pages.products_manettes')->name('manettes');
-Route::view('/products_cam','pages.products_cam')->name('cam');
+Route::view('/casques-audio','pages.product_casque')->name('casque');
+Route::view('/appareils-photo-pro','pages.product_cam')->name('cam');
+Route::view('/electronique','pages.product_ordi')->name('ordi');
+Route::view('/maison','home')->name('maison');
+Route::view('/sport','home')->name('sport');
+Route::view('/appareils-photo','pages.product_cam')->name('cam');
+Route::view('/disques-durs','pages.product_disk')->name('disk');
+Route::view('/manettes','pages.product_manette')->name('manettes');
+Route::view('/telephones-portables','pages.product_tel')->name('tel');
+
 Route::view('/security','security')->name('security');
 Route::view('/conditions','conditions')->name('conditions');
 Route::view('/cookies','cookies')->name('cookies');
@@ -56,3 +59,9 @@ Route::view('/product_disk-detail', 'pages.product_disk-detail')->name('disk_det
 Route::view('/product_cam_details', 'pages.product_cam_details')->name('cam_details');
 Route::view('/product_tel_details', 'pages.product_tel_details')->name('tel_details');
 
+// routes/web.php
+Route::view('/product_casqueDetail/{id}','pages.product_casqueDetail')->name('product.detail');
+// routes/web.php
+Route::get('/products/{id}', function ($id) {
+    return view('pages.product_casqueDetail', ['productId' => $id]);
+})->name('product.detail');

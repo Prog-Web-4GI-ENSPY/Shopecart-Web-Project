@@ -6,10 +6,6 @@
   <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/header.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/footer.css') }}">
-<script src="{{ asset('assets/js/header.js') }}"></script>
-  <script src="{{ asset('assets/js/api-service.js') }}" defer></script>
-  <script src="{{ asset('assets/js/logout.js') }}" defer></script>
-<script defer src="{{ asset('assets/js/newsletter.js') }}"></script>
 
 
   <!-- Utilisation de Font Awesome pour les icônes -->
@@ -120,7 +116,7 @@
     <section class="explore" id="explore">
       <h2>Prêt à Acheter ?</h2>
       <p>Découvrez les meilleures offres et produits conçus pour vous dès aujourd'hui !</p>
-      <a href="{{ route('catalogue') }}" class="hero-cta">Acheter Maintenant</a>
+      <a href="{{ route('casque') }}" class="hero-cta">Acheter Maintenant</a>
       <div class="testimonials">
         <p>"Service incroyable et livraison rapide ! Je recommande vivement !" - Jean D.</p>
         <p>"Meilleur magasin d'électronique au Cameroun, des prix excellents !" - Sarah K.</p>
