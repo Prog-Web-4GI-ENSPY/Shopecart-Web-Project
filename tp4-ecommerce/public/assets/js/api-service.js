@@ -3,9 +3,18 @@ class ApiService {
     constructor() {
         this.baseURL = 'https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud/api';
         this.token = localStorage.getItem('auth_token');
+        this.storageURL = 'https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud/storage/';
         this.categoriesCache = null;
     }
 
+    /**
+     * Helper pour construire les URLs d'images complètes
+     */
+    getImageUrl(path) {
+        if (!path) return '/assets/images/placeholder.png';
+        if (path.startsWith('http')) return path;
+        return `${this.storageURL}${path}`;
+    }
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
         const config = {
@@ -44,7 +53,10 @@ class ApiService {
     handleUnauthorized() {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user');
-        window.location.href = '/login.html';
+        // Rediriger seulement si on n'est pas déjà sur login
+        if (!window.location.pathname.includes('login.html')) {
+            window.location.href = '/login.html';
+        }
     }
 
     // ==================== MÉTHODES CATÉGORIES ====================
@@ -292,7 +304,43 @@ class ApiService {
     async getCurrentUser() {
         return await this.request('/user');
     }
+
+    // ==================== PANIER (BACKEND) ====================
+    async getCart() {
+        return await this.request('/cart');
+    }
+
+    async addToCart(productId, quantity = 1) {
+        return await this.request('/cart/add', {
+            method: 'POST',
+            body: JSON.stringify({ product_id: productId, quantity })
+        });
+    }
+
+    async updateCartItem(itemId, quantity) {
+        return await this.request(`/cart/update/${itemId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ quantity })
+        });
+    }
+
+    async removeCartItem(itemId) {
+        return await this.request(`/cart/remove/${itemId}`, { method: 'DELETE' });
+    }
+
+
 }
 
+window.handleCheckout = function() {
+    console.log("🚀 Redirection vers la page de commande...");
+    // Si l'utilisateur n'est pas connecté, on le redirige vers login
+    if (!window.apiService.token) {
+        alert("Veuillez vous connecter pour passer commande.");
+        window.location.href = '/login';
+        return;
+    }
+    // Sinon direction checkout
+    window.location.href = '/checkout';
+};
 // Instance globale
 window.apiService = new ApiService();

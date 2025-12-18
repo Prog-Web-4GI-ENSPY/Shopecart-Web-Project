@@ -1,3 +1,14 @@
+window.USER_STORAGE_KEY = window.USER_STORAGE_KEY || 'shopcart_user_data';
+window.CART_STORAGE_KEY = window.CART_STORAGE_KEY || 'shopcart_cart';
+
+// Initialise CartData globalement s'il n'existe pas
+if (typeof window.CartData === 'undefined') {
+    window.CartData = { cart_items: [], total: 0 };
+}
+// Alias pour la compatibilité avec votre code existant dans panier.js
+var cartData = window.CartData;
+
+
 // JavaScript pour gérer le menu mobile
 document.addEventListener('DOMContentLoaded', function() {
   const hamburger = document.getElementById('hamburger');
@@ -126,9 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-let CartData = null;
-const CART_STORAGE = 'shopcart_cart';
-const USER_STORAGE_KEY = 'user';
+
 
 /**
  * Met à jour les boutons utilisateur selon l'état de connexion
@@ -202,16 +211,17 @@ function updateCartBadge() {
  */
 async function loadCartData() {
   try {
-    const savedCart = localStorage.getItem(CART_STORAGE);
+    // CORRECTION ICI : Utilisez CART_STORAGE_KEY (le nom global)
+    const savedCart = localStorage.getItem(window.CART_STORAGE_KEY);
     
     if (savedCart) {
-      CartData = JSON.parse(savedCart);
+      window.CartData = JSON.parse(savedCart);
     } else {
-      CartData = { cart_items: [] };
+      window.CartData = { cart_items: [] };
     }
   } catch (error) {
     console.error('❌ Erreur lors du chargement du panier:', error);
-    CartData = { cart_items: [] };
+    window.CartData = { cart_items: [] };
   }
 }
 
