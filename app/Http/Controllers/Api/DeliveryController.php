@@ -66,7 +66,9 @@ class DeliveryController extends Controller
 
         return response()->json([
             'message' => 'Pending orders retrieved successfully',
-            'data' => OrderResource::collection($pendingOrders) // Utilisation d'une ressource
+            'data' => OrderResource::collection($pendingOrders), // Utilisation d'une ressource
+            'status' => 'succes', // Ajouté
+            'code' => 200, // Ajouté
         ]);
     }
 
@@ -129,7 +131,9 @@ class DeliveryController extends Controller
 
         return response()->json([
             'message' => "Order {$order->id} assigned to delivery user {$deliveryUser->name} successfully",
-            'data' => new OrderResource($order)
+            'data' => new OrderResource($order),
+            'status' => 'succes', // Ajouté
+            'code' => 200, // Ajouté
         ]);
     }
 
@@ -164,7 +168,9 @@ class DeliveryController extends Controller
 
         return response()->json([
             'message' => 'Assigned deliveries retrieved successfully',
-            'data' => OrderResource::collection($myDeliveries)
+            'data' => OrderResource::collection($myDeliveries),
+            'status' => 'succes', // Ajouté
+            'code' => 200, // Ajouté
         ]);
     }
 
@@ -230,7 +236,9 @@ class DeliveryController extends Controller
 
         return response()->json([
             'message' => "Delivery status updated to {$validated['status']} for order {$order->id}",
-            'data' => new OrderResource($order)
+            'data' => new OrderResource($order),
+            'status' => 'succes', // Ajouté
+            'code' => 200, // Ajouté
         ]);
     }
 
@@ -270,7 +278,9 @@ class DeliveryController extends Controller
 
         return response()->json([
             'message' => 'Location updated successfully',
-            'data' => $location
+            'data' => $location,
+            'status' => 'succes', // Ajouté
+            'code' => 200, // Ajouté
         ]);
     }
 
@@ -303,7 +313,9 @@ class DeliveryController extends Controller
 
         return response()->json([
             'message' => 'Live locations retrieved successfully',
-            'data' => $liveLocations
+            'data' => $liveLocations,
+            'status' => 'succes', // Ajouté
+            'code' => 200, // Ajouté
         ]);
     }
 
@@ -405,7 +417,9 @@ class DeliveryController extends Controller
             'data' => [
                 'proof_url' => asset($proofUrl),
                 'proof_type' => $order->proof_type,
-            ]
+            ],
+            'status' => 'succes', // Ajouté
+            'code' => 200, // Ajouté
         ]);
     }
 }
