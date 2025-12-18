@@ -163,20 +163,20 @@ class DashboardController extends Controller
         }
 
 
-        $salesData = Order::select(
-                $selectLabel,
-                DB::raw('SUM(total) as revenue'),
-                DB::raw('COUNT(id) as order_count')
-            )
-            ->whereIn('status', ['PAID', 'DELIVERED']) 
-            ->where('created_at', '>=', $startDate)
-            ->groupBy('label')
-            ->orderBy('label', 'asc')
-            ->get();
+        // Dans votre DashboardController
+        $sales = Order::select(
+            DB::raw("CAST(created_at AS DATE) as date"), // Format compatible PostgreSQL
+            DB::raw("SUM(total) as total_sales")
+        )
+        ->whereIn('status', ['DELIVERED', 'PAID', 'COMPLETED']) // Ajoutez DELIVERED ici
+        ->where('created_at', '>=', now()->subDays(30))
+        ->groupBy(DB::raw("CAST(created_at AS DATE)"))
+        ->orderBy('date', 'ASC')
+        ->get();
 
         return response()->json([
             'message' => 'Sales data retrieved successfully',
-            'data' => $salesData,
+            'data' => $sales,
         ]);
     }
 
