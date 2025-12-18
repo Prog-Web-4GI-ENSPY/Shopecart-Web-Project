@@ -255,6 +255,50 @@ class ProductController extends Controller
     }
 
     /**
+     * @OA\Get(
+     * path="/api/products/id/{id}",
+     * summary="Get product details by ID (Public Access)",
+     * tags={"Products"},
+     * @OA\Parameter(
+     * name="id",
+     * in="path",
+     * required=true,
+     * description="Product ID",
+     * @OA\Schema(type="integer")
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Product retrieved successfully"
+     * ),
+     * @OA\Response(response=404, description="Product not found")
+     * )
+     */
+    public function showById(int $id)
+    {
+        try {
+            // Récupère le produit par ID avec ses variantes
+            $product = Product::with(['variants'])
+                ->where('is_visible', true)
+                ->findOrFail($id);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => new ProductResource($product),
+                'message' => 'Product retrieved successfully',
+                'code' => 200
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'data' => null,
+                'message' => 'Product not found or not visible.',
+                'code' => 404
+            ], 404);
+        }
+    }
+
+    /**
      * @OA\Post(
      * path="/api/products/{id}",
      * summary="Update product (Use POST with _method=PUT for file upload)",
@@ -345,6 +389,7 @@ class ProductController extends Controller
         if (isset($validated['name']) && $validated['name'] !== $product->name) {
             $validated['slug'] = $this->generateUniqueSlug($validated['name']);
         }
+        
         
         // 2. Gestion de l'Image
         

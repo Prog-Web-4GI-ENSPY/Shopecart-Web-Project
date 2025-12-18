@@ -40,8 +40,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
+
 Route::get('products/featured', [ProductController::class, 'featured']);
 Route::get('products/{slug}', [ProductController::class, 'show']);
+// Routes publiques pour les produits
+Route::get('/products/id/{id}', [ProductController::class, 'showById']); // Nouvelle route par ID
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
