@@ -25,6 +25,7 @@ Route::get('/', function () {
 
 // Pages Blade
 Route::view('/login', 'auth.login')->name('login');
+Route::view('/login.html', 'auth.login')->name('login');
 Route::view('/register', 'auth.register')->name('register');
 Route::view('/cart', 'cart')->name('cart');
 Route::view('/about', 'about')->name('about');
@@ -37,15 +38,15 @@ Route::view('/blog/article3', 'articles.article3')->name('article3');
 Route::view('/blog/article4', 'articles.article4')->name('article4');
 Route::view('/blog/article5', 'articles.article5')->name('article5');
 Route::view('/blog/article6', 'articles.article6')->name('article6');
-Route::view('/casques-audio','pages.product_casque')->name('casque');
+Route::view('/casques','pages.product_casque')->name('casque');
 Route::view('/appareils-photo-pro','pages.product_cam')->name('cam');
-Route::view('/electronique','pages.product_ordi')->name('ordi');
+Route::view('/ordinateurs','pages.product_ordi')->name('ordi');
 Route::view('/maison','home')->name('maison');
 Route::view('/sport','home')->name('sport');
 Route::view('/appareils-photo','pages.product_cam')->name('cam');
 Route::view('/disques-durs','pages.product_disk')->name('disk');
 Route::view('/manettes','pages.product_manette')->name('manettes');
-Route::view('/telephones-portables','pages.product_tel')->name('tel');
+Route::view('/telephones','pages.product_tel')->name('tel');
 
 Route::view('/security','security')->name('security');
 Route::view('/conditions','conditions')->name('conditions');
