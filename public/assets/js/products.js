@@ -303,7 +303,7 @@ class ProductManager {
                                     <option value="Ordinateurs" ${productData && productData.category === 'Ordinateurs' ? 'selected' : ''}>Ordinateurs</option>
                                     <option value="Téléphones" ${productData && productData.category === 'Téléphones' ? 'selected' : ''}>Téléphones</option>
                                     <option value="Accessoires" ${productData && productData.category === 'Accessoires' ? 'selected' : ''}>Accessoires</option>
-                                    <option value="Électronique" ${productData && productData.category === 'Électronique' ? 'selected' : ''}>Électronique</option>
+                                    <option value="Ordinateurs" ${productData && productData.category === 'Ordinateurs' ? 'selected' : ''}>Ordinateurs</option>
                                 </select>
                             </div>
                             <div class="form-group">

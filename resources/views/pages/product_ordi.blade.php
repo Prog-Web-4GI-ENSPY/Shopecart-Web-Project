@@ -237,7 +237,7 @@
         };
         
         // Catégories à essayer
-        const categoryNames = ['Électronique'];
+        const categoryNames = ['Ordinateurs'];
         
         let loaded = false;
         

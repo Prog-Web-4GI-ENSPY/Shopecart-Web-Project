@@ -269,7 +269,7 @@ function selectVariant(variant) {
             };
             
             // Essayer différentes catégories
-            const categoryNames = ['Électronique', 'Casques audio', 'Audio'];
+            const categoryNames = ['Ordinateurs', 'Casques', 'Telephones'];
             
             for (const categoryName of categoryNames) {
                 try {
