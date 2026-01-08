@@ -60,7 +60,7 @@ class OrderController extends Controller
             // Format de réponse minimal
             return response()->json([
                 'message' => 'Orders retrieved successfully',
-                'data' => OrderResource::collection($orders->items()),
+                'data' => OrderResource::collection($orders),
             ], 200);
 
         }
